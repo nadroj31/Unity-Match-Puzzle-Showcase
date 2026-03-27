@@ -5,159 +5,198 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Orchestrator for the gameplay scene.
+/// Owns the board data arrays and wires together the sub-systems:
+///   - BoardLogic      (pure, stateless algorithms)
+///   - GoalTracker     (goal state + events)
+///   - BrickFactory    (view creation)
+///   - BrickVisualConfig (sprite mapping)
+///
+/// All Singleton dependencies have been removed; references are injected via Inspector.
+/// </summary>
 public class GamePlayBoard : MonoBehaviour
 {
-    [SerializeField] private SpriteRenderer boardBackground;
-    [SerializeField] private Transform bricksParent;
-    [SerializeField] private Sprite[] sprites;
-    [SerializeField] private int minMatchCount = 2;
-    [SerializeField] private Image goal;
-    [SerializeField] private TextMeshProUGUI goalText;
-    [SerializeField] private GameObject victoryUI;
-    [SerializeField] private Button goBackMainMenuButton;
+    // -------------------------------------------------------------------------
+    // Inspector references
+    // -------------------------------------------------------------------------
 
-    private const float BackgroundOffset = 0.3f;
-    private const float DropHeightOffset = 2.3f;
+    [Header("Data / Config")]
+    [SerializeField] private LevelRepository   levelRepository;
+    [SerializeField] private GameSession       gameSession;
+    [SerializeField] private BrickVisualConfig visualConfig;
+
+    [Header("Scene Components")]
+    [SerializeField] private BrickFactory    brickFactory;
+    [SerializeField] private SpriteRenderer  boardBackground;
+    [SerializeField] private Transform       bricksParent;
+
+    [Header("UI")]
+    [SerializeField] private Image           goalImage;
+    [SerializeField] private TextMeshProUGUI goalText;
+    [SerializeField] private GameObject      victoryUI;
+    [SerializeField] private Button          goBackButton;
+
+    [Header("Rules")]
+    [SerializeField] private int minMatchCount = 2;
+
+    // -------------------------------------------------------------------------
+    // Constants
+    // -------------------------------------------------------------------------
+
+    private const float BackgroundPadding  = 0.3f;
+    private const float DropHeightOffset   = 2.3f;
+    private const float ProcessLockSeconds = 0.4f;
+
+    // -------------------------------------------------------------------------
+    // Runtime state
+    // -------------------------------------------------------------------------
 
     private LevelDetails levelDetails;
-    private Brick[,] bricks;
+    private Brick[,]     bricks;
     private BrickShow[,] brickShows;
-    private List<BrickShow> matchBrickShows;
-    private bool isFillingBoard;
-    private bool isVictory = false;
-    private BrickType goalType;
-    private int goalCount;
+    private GoalTracker  goalTracker;
+    private bool         isProcessing;
+
+    // -------------------------------------------------------------------------
+    // Unity lifecycle
+    // -------------------------------------------------------------------------
 
     private void Awake()
     {
-        goBackMainMenuButton.onClick.RemoveAllListeners();
-        goBackMainMenuButton.onClick.AddListener(GoBackToMainMenu);
-        levelDetails = LevelData.Instance.GetLevelDetails(PlayerPrefs.GetInt("SelectLevel"));
+        goBackButton.onClick.RemoveAllListeners();
+        goBackButton.onClick.AddListener(GoBack);
+
+        levelDetails = levelRepository.GetLevelDetails(gameSession.SelectedLevel);
         Initialize();
     }
 
+    // -------------------------------------------------------------------------
+    // Initialisation
+    // -------------------------------------------------------------------------
+
     private void Initialize()
     {
-        boardBackground.size = new Vector2(levelDetails.gridWidth + BackgroundOffset, levelDetails.gridHeight + BackgroundOffset);
-        bricks = new Brick[levelDetails.gridWidth, levelDetails.gridHeight];
+        visualConfig.Initialize();
+
+        boardBackground.size = new Vector2(
+            levelDetails.gridWidth  + BackgroundPadding,
+            levelDetails.gridHeight + BackgroundPadding);
+
+        bricks     = new Brick[levelDetails.gridWidth, levelDetails.gridHeight];
         brickShows = new BrickShow[levelDetails.gridWidth, levelDetails.gridHeight];
-        matchBrickShows = new List<BrickShow>();
 
         PopulateBricks();
-        SetGoal();
+        SetupGoal();
     }
 
     private void PopulateBricks()
     {
-        for (int i = 0; i < levelDetails.gridWidth; ++i)
+        for (int x = 0; x < levelDetails.gridWidth; x++)
         {
-            for (int j = 0; j < levelDetails.gridHeight; ++j)
+            for (int y = 0; y < levelDetails.gridHeight; y++)
             {
-                var brick = new Brick(i, j, levelDetails.gridData[i, j]);
+                var brick = new Brick(x, y, levelDetails.gridData[x, y]);
                 brick.SetPosition(levelDetails.gridWidth, levelDetails.gridHeight);
-                bricks[i, j] = brick;
+                bricks[x, y] = brick;
 
-                BrickShow brickShow = BrickFactory.Instance.CreateBrick(brick, bricksParent);
-                if (brickShow != null)
-                {
-                    brickShow.SetSprite(sprites[(int)brick.BrickType - 1]);
-                    brickShow.SetOnClickAction(OnBrickClick);
-                    brickShows[i, j] = brickShow;
-                }
+                BrickShow brickShow = brickFactory.CreateBrick(brick, bricksParent);
+                if (brickShow == null) continue;
+
+                brickShow.SetSprite(visualConfig.GetSprite(brick.BrickType));
+                brickShow.SetOnClickAction(OnBrickClick);
+                brickShows[x, y] = brickShow;
             }
         }
     }
 
-    private void SetGoal()
+    private void SetupGoal()
     {
-        goalType = levelDetails.goal switch
-        {
-            "b" => BrickType.BLUE_BRICK,
-            "g" => BrickType.GREEN_BRICK,
-            "y" => BrickType.YELLOW_BRICK,
-            "r" => BrickType.RED_BRICK,
-            _ => BrickType.RANDOM_BRICK,
-        };
+        BrickType goalType = ParseGoalType(levelDetails.goal);
 
-        goal.sprite = sprites[(int)goalType - 1];
-        goalCount = levelDetails.goalNumber;
-        goalText.text = goalCount.ToString();
+        goalTracker = new GoalTracker(goalType, levelDetails.goalNumber);
+        goalTracker.OnGoalCountChanged += count => goalText.text = count.ToString();
+        goalTracker.OnGoalCompleted    += ShowVictory;
+
+        goalImage.sprite = visualConfig.GetSprite(goalType);
+        goalText.text    = levelDetails.goalNumber.ToString();
     }
 
-    private void OnBrickClick(Brick clickedBrick)
+    private static BrickType ParseGoalType(string code) => code switch
     {
-        if (isFillingBoard || isVictory)
-        {
-            return;
-        }
+        "b" => BrickType.BLUE_BRICK,
+        "g" => BrickType.GREEN_BRICK,
+        "y" => BrickType.YELLOW_BRICK,
+        "r" => BrickType.RED_BRICK,
+        _   => BrickType.RANDOM_BRICK,
+    };
 
-        var matchBricks = GamePlayBoardHandler.Instance.FindMatchBricks(clickedBrick, bricks);
-        if (matchBricks.Count < minMatchCount)
-        {
-            return;
-        }
+    // -------------------------------------------------------------------------
+    // Input handling
+    // -------------------------------------------------------------------------
 
-        isFillingBoard = true;
-        ProcessMatchedBricks(matchBricks);
+    private void OnBrickClick(Brick clicked)
+    {
+        if (isProcessing) return;
+
+        List<Brick> matches = BoardLogic.FindMatchBricks(clicked, bricks);
+        if (matches.Count < minMatchCount) return;
+
+        isProcessing = true;
+        ProcessMatches(matches);
     }
 
-    private void ProcessMatchedBricks(List<Brick> matchBricks)
+    // -------------------------------------------------------------------------
+    // Match processing
+    // -------------------------------------------------------------------------
+
+    private void ProcessMatches(List<Brick> matches)
     {
-        BrickType matchBrickType = matchBricks[0].BrickType;
+        BrickType matchType = matches[0].BrickType;
 
-        foreach (var brick in matchBricks)
-        {
-            var brickShow = brickShows[brick.X, brick.Y];
-            matchBrickShows.Add(brickShow);
-            brickShow.transform.localScale = Vector3.zero;
-        }
+        foreach (var brick in matches)
+            brickShows[brick.X, brick.Y].Hide();
 
-        if (isFillingBoard)
-        {
-            GamePlayBoardHandler.Instance.FillingBoard(matchBricks, OnFillingBoard);
-            UpdateGoal(matchBrickType, matchBricks.Count);
-            StartCoroutine(ResetFillingState());
-        }
+        BoardLogic.ApplyGravity(matches, bricks, OnBrickMoved);
+
+        goalTracker.RegisterMatch(matchType, matches.Count);
+
+        StartCoroutine(UnlockAfterDelay(ProcessLockSeconds));
     }
 
-    private IEnumerator ResetFillingState()
+    /// <summary>
+    /// Called by <see cref="BoardLogic.ApplyGravity"/> for every position that changes.
+    /// <paramref name="from"/> is null when a brand-new random brick drops in from above.
+    /// </summary>
+    private void OnBrickMoved(Brick from, Brick to)
     {
-        yield return new WaitForSeconds(0.4f);
-        isFillingBoard = false;
+        BrickShow show = brickShows[to.X, to.Y];
+        show.Show();
+        show.SetSprite(visualConfig.GetSprite(from?.BrickType ?? to.BrickType));
+        show.TweenMove(
+            originY: from?.Position.y ?? levelDetails.gridHeight / 2f + DropHeightOffset,
+            targetY: to.Position.y);
     }
 
-    private void OnFillingBoard(Brick fromBrick, Brick toBrick)
+    private IEnumerator UnlockAfterDelay(float seconds)
     {
-        var bottomBrickShow = brickShows[toBrick.X, toBrick.Y];
-        bottomBrickShow.transform.localScale = Vector3.one;
-        bottomBrickShow.SetSprite(sprites[(int)(fromBrick?.BrickType ?? toBrick.BrickType) - 1]);
-        bottomBrickShow.TweenMove(fromBrick?.Position.y ?? levelDetails.gridHeight / 2 + DropHeightOffset, toBrick.Position.y);
+        yield return new WaitForSeconds(seconds);
+        isProcessing = false;
     }
 
-    private void UpdateGoal(BrickType brickType, int matchCount)
-    {
-        if (goalType == BrickType.RANDOM_BRICK || goalType == brickType)
-        {
-            goalCount = Mathf.Max(goalCount - matchCount, 0);
-            goalText.text = goalCount.ToString();
+    // -------------------------------------------------------------------------
+    // Victory / navigation
+    // -------------------------------------------------------------------------
 
-            if (goalCount <= 0)
-            {
-                isVictory = true;
-                OpenVictoryScreen();
-            }
-        }
-    }
-
-    private void OpenVictoryScreen()
+    private void ShowVictory()
     {
+        isProcessing = true; // block further input
         victoryUI.SetActive(true);
-    } 
+    }
 
-    private void GoBackToMainMenu()
+    private void GoBack()
     {
         DOTween.KillAll();
         ScenesManager.Instance.LoadMainMenu();
     }
 }
-

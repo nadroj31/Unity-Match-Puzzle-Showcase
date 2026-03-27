@@ -2,13 +2,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Main menu UI controller.
+/// <see cref="LevelRepository"/> is injected via the Inspector — no singleton.
+/// </summary>
 public class MainMenu : MonoBehaviour
 {
-    [SerializeField] private Button exitButton;
-    [SerializeField] private Button startButton;
-    [SerializeField] private GameObject levelSelectUI;
-    [SerializeField] private LevelButton levelButtonPrefab;
-    [SerializeField] private Transform levelButtonParent;
+    [SerializeField] private LevelRepository levelRepository;
+    [SerializeField] private Button          exitButton;
+    [SerializeField] private Button          startButton;
+    [SerializeField] private GameObject      levelSelectUI;
+    [SerializeField] private LevelButton     levelButtonPrefab;
+    [SerializeField] private Transform       levelButtonParent;
 
     private readonly List<LevelButton> levelButtons = new List<LevelButton>();
 
@@ -27,27 +32,24 @@ public class MainMenu : MonoBehaviour
 
     private void OpenLevelSelectMenu()
     {
-        LevelData levelData = LevelData.Instance;
-        levelData.LoadLevelData();
+        levelRepository.LoadLevelData();
 
-        List<int> levelKeys = levelData.GetAllLevelKeys();
-        int keysCount = levelKeys.Count;
-        int buttonsCount = levelButtons.Count;
+        List<int> levelKeys  = levelRepository.GetAllLevelKeys();
+        int       keysCount  = levelKeys.Count;
+        int       btnCount   = levelButtons.Count;
 
-        for (int i = 0; i < Mathf.Max(keysCount, buttonsCount); ++i)
+        for (int i = 0; i < Mathf.Max(keysCount, btnCount); i++)
         {
-            if (i >= buttonsCount)
+            if (i >= btnCount)
             {
-                var levelButtonCopy = Instantiate(levelButtonPrefab, levelButtonParent);
-                levelButtons.Add(levelButtonCopy.GetComponent<LevelButton>());
+                var btn = Instantiate(levelButtonPrefab, levelButtonParent);
+                levelButtons.Add(btn.GetComponent<LevelButton>());
             }
 
             bool isActive = i < keysCount;
             levelButtons[i].gameObject.SetActive(isActive);
-            if (isActive) 
-            {
+            if (isActive)
                 levelButtons[i].SetLevelText(levelKeys[i]);
-            }
         }
 
         levelSelectUI.SetActive(true);
