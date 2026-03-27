@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ScriptableObject repository for level data.
-/// Loads JSON files from Resources/LevelInfos and caches them as LevelDetails.
-/// Replaces the LevelData singleton. Inject via Inspector.
+/// Loads and caches level data from JSON files stored in <c>Resources/LevelInfos</c>.
 /// </summary>
 [CreateAssetMenu(fileName = "LevelRepository", menuName = "Game/LevelRepository")]
 public class LevelRepository : ScriptableObject
@@ -32,7 +30,7 @@ public class LevelRepository : ScriptableObject
             };
 
             int gridIndex = 0;
-            // JSON rows are stored top-to-bottom; we read them bottom-to-top for world space
+            // JSON rows are stored top-to-bottom; invert to match world-space Y
             for (int row = info.gridHeight - 1; row >= 0; row--)
             {
                 for (int col = 0; col < info.gridWidth; col++)
@@ -61,8 +59,5 @@ public class LevelRepository : ScriptableObject
         return null;
     }
 
-    public List<int> GetAllLevelKeys()
-    {
-        return new List<int>(levels.Keys);
-    }
+    public List<int> GetAllLevelKeys() => new List<int>(levels.Keys);
 }

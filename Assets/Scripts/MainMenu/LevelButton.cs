@@ -3,10 +3,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Level selection button.
-/// Writes the chosen level to <see cref="GameSession"/> (ScriptableObject)
-/// instead of PlayerPrefs — no disk I/O, no magic string keys.
-/// <see cref="GameSession"/> is injected via the Inspector on the prefab.
+/// Level-select button. Stores the chosen level number in <see cref="GameSession"/>
+/// before loading the gameplay scene.
 /// </summary>
 public class LevelButton : MonoBehaviour
 {

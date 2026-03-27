@@ -2,12 +2,11 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// Plain C# class that tracks the level goal.
-/// Fires events instead of touching UI directly — keeps logic and view decoupled.
+/// Tracks progress toward the level goal and fires events when updated or completed.
 /// </summary>
 public class GoalTracker
 {
-    /// <summary>Fired whenever the remaining count changes. Passes the new count.</summary>
+    /// <summary>Fired each time the remaining count changes. Argument is the new count.</summary>
     public event Action<int> OnGoalCountChanged;
 
     /// <summary>Fired once when the remaining count reaches zero.</summary>
@@ -23,12 +22,11 @@ public class GoalTracker
     }
 
     /// <summary>
-    /// Call this after a match is made.
-    /// If the matched type qualifies toward the goal the counter is decremented.
+    /// Registers a completed match. Decrements the counter when the matched type qualifies.
+    /// <see cref="BrickType.RANDOM_BRICK"/> as goal type accepts any colour.
     /// </summary>
     public void RegisterMatch(BrickType matchedType, int count)
     {
-        // RANDOM_BRICK goal = every colour counts
         if (GoalType != BrickType.RANDOM_BRICK && GoalType != matchedType)
             return;
 

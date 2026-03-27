@@ -3,9 +3,8 @@ using System;
 using UnityEngine;
 
 /// <summary>
-/// View / presentation layer for a single Brick.
+/// View component for a single board cell.
 /// Handles sprite display, click forwarding, and drop animations.
-/// External code uses Hide() / Show() — never touches transform.localScale directly.
 /// </summary>
 public class BrickShow : MonoBehaviour
 {
@@ -14,9 +13,7 @@ public class BrickShow : MonoBehaviour
     private Brick         brick;
     private Action<Brick> onClick;
 
-    // -------------------------------------------------------------------------
-    // Setup
-    // -------------------------------------------------------------------------
+    // ── Setup ─────────────────────────────────────────────────────────────────
 
     public void SetData(Brick brick)
     {
@@ -24,45 +21,27 @@ public class BrickShow : MonoBehaviour
         transform.localPosition = brick.Position;
     }
 
-    public void SetSprite(Sprite sprite)
-    {
-        spriteRenderer.sprite = sprite;
-    }
+    public void SetSprite(Sprite sprite)         => spriteRenderer.sprite = sprite;
+    public void SetOnClickAction(Action<Brick> a) => onClick = a;
 
-    public void SetOnClickAction(Action<Brick> action)
-    {
-        onClick = action;
-    }
-
-    // -------------------------------------------------------------------------
-    // Visibility — callers use semantic methods, not raw transform access
-    // -------------------------------------------------------------------------
+    // ── Visibility ────────────────────────────────────────────────────────────
 
     public void Hide() => transform.localScale = Vector3.zero;
     public void Show() => transform.localScale = Vector3.one;
 
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
+    // ── Input ─────────────────────────────────────────────────────────────────
 
-    private void OnMouseUp()
-    {
-        onClick?.Invoke(brick);
-    }
+    private void OnMouseUp() => onClick?.Invoke(brick);
 
-    // -------------------------------------------------------------------------
-    // Animation
-    // -------------------------------------------------------------------------
+    // ── Animation ─────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Teleports the view to <paramref name="originY"/> then tweens it to
-    /// <paramref name="targetY"/>. Both values are in local space.
-    /// Returns self for optional chaining.
+    /// Snaps to <paramref name="originY"/> then tweens down to <paramref name="targetY"/> (local space).
+    /// Returns <c>this</c> for optional chaining.
     /// </summary>
     public BrickShow TweenMove(float originY, float targetY)
     {
         transform.localPosition = new Vector3(transform.localPosition.x, originY);
-        // DOLocalMoveY keeps the tween in local space, matching SetData / SetPosition
         transform.DOLocalMoveY(targetY, 0.3f).SetEase(Ease.InOutQuad).SetDelay(0.01f);
         return this;
     }

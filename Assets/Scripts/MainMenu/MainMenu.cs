@@ -2,10 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>
-/// Main menu UI controller.
-/// <see cref="LevelRepository"/> is injected via the Inspector — no singleton.
-/// </summary>
+/// <summary>UI controller for the main menu and level-select screen.</summary>
 public class MainMenu : MonoBehaviour
 {
     [SerializeField] private LevelRepository levelRepository;
@@ -25,18 +22,15 @@ public class MainMenu : MonoBehaviour
         startButton.onClick.AddListener(OpenLevelSelectMenu);
     }
 
-    private void CloseLevelSelectMenu()
-    {
-        levelSelectUI.SetActive(false);
-    }
+    private void CloseLevelSelectMenu() => levelSelectUI.SetActive(false);
 
     private void OpenLevelSelectMenu()
     {
         levelRepository.LoadLevelData();
 
-        List<int> levelKeys  = levelRepository.GetAllLevelKeys();
-        int       keysCount  = levelKeys.Count;
-        int       btnCount   = levelButtons.Count;
+        List<int> levelKeys = levelRepository.GetAllLevelKeys();
+        int       keysCount = levelKeys.Count;
+        int       btnCount  = levelButtons.Count;
 
         for (int i = 0; i < Mathf.Max(keysCount, btnCount); i++)
         {

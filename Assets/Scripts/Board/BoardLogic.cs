@@ -3,23 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-/// <summary>
-/// Stateless, static game-logic layer for the board.
-/// No singleton, no MonoBehaviour — pure algorithms with no Unity scene coupling.
-/// Replaces GamePlayBoardHandler.
-/// </summary>
+/// <summary>Stateless game-logic layer. Pure algorithms — no MonoBehaviour, no scene coupling.</summary>
 public static class BoardLogic
 {
-    private static readonly int[] DirX = { 1, -1, 0,  0 };
-    private static readonly int[] DirY = { 0,  0, 1, -1 };
+    private static readonly int[] DirX = {  1, -1,  0,  0 };
+    private static readonly int[] DirY = {  0,  0,  1, -1 };
 
-    // -------------------------------------------------------------------------
-    // Flood-fill (iterative BFS — no recursion, no stack-overflow risk)
-    // -------------------------------------------------------------------------
+    // ── Flood-fill ────────────────────────────────────────────────────────────
 
     /// <summary>
     /// Returns all bricks orthogonally connected to <paramref name="startBrick"/>
-    /// that share the same BrickType.
+    /// that share the same <see cref="BrickType"/>. Uses iterative BFS.
     /// </summary>
     public static List<Brick> FindMatchBricks(Brick startBrick, Brick[,] board)
     {
@@ -56,28 +50,24 @@ public static class BoardLogic
         return result;
     }
 
-    // -------------------------------------------------------------------------
-    // Gravity / board fill
-    // -------------------------------------------------------------------------
+    // ── Gravity ───────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Applies gravity to each affected column after bricks are removed.
-    /// Surviving bricks fall to the bottom; random bricks fill from the top.
-    ///
-    /// <paramref name="onBrickMoved"/> fires for every position that changes:
-    ///   - (sourceBrick, targetBrick)  → existing brick slides down
-    ///   - (null,        targetBrick)  → new random brick drops in from above
-    ///
-    /// The callback is responsible for updating the view layer.
+    /// Collapses each affected column after bricks are removed; fills vacated top
+    /// slots with new random bricks. Fires <paramref name="onBrickMoved"/> for every
+    /// position that changes:
+    /// <list type="bullet">
+    ///   <item>(sourceBrick, targetBrick) — existing brick slides down</item>
+    ///   <item>(null, targetBrick)        — new random brick drops in from above</item>
+    /// </list>
     /// </summary>
     public static void ApplyGravity(
-        List<Brick>            removedBricks,
-        Brick[,]               board,
-        Action<Brick, Brick>   onBrickMoved)
+        List<Brick>          removedBricks,
+        Brick[,]             board,
+        Action<Brick, Brick> onBrickMoved)
     {
         int height = board.GetLength(1);
 
-        // Group removed rows by column
         var removedByColumn = removedBricks
             .GroupBy(b => b.X)
             .ToDictionary(g => g.Key, g => new HashSet<int>(g.Select(b => b.Y)));
@@ -92,21 +82,19 @@ public static class BoardLogic
                     survivors.Add(board[col, y]);
             }
 
-            // Drop survivors to the bottom of the column.
-            // We read survivors[y].BrickType BEFORE any write to that slot,
-            // because survivors[y].Y >= y always (bricks only fall down).
+            // Drop survivors; source Y is always >= target Y so reads are safe before writes
             for (int y = 0; y < survivors.Count; y++)
             {
                 Brick source = survivors[y];
                 Brick target = board[col, y];
 
-                if (source.Y == y) continue; // already in correct slot
+                if (source.Y == y) continue;
 
                 target.SetBrickType(source.BrickType);
                 onBrickMoved?.Invoke(source, target);
             }
 
-            // Fill vacated top slots with new random bricks
+            // Fill vacated top slots with random bricks
             for (int y = survivors.Count; y < height; y++)
             {
                 board[col, y].SetBrickType(GetRandomBrickType());
@@ -115,14 +103,12 @@ public static class BoardLogic
         }
     }
 
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
+    /// <summary>Returns a random colour brick type, excluding NONE and RANDOM_BRICK.</summary>
     public static BrickType GetRandomBrickType()
     {
         BrickType[] types = (BrickType[])Enum.GetValues(typeof(BrickType));
-        // Index 0 = NONE, 1 = RANDOM_BRICK, 2+ = actual colour bricks
         return types[UnityEngine.Random.Range(2, types.Length)];
     }
 }

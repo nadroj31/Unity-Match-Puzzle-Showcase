@@ -3,12 +3,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Persistent scene-transition manager (survives scene loads).
-/// Implements <see cref="ISceneNavigator"/> so callers depend on the interface,
-/// not the concrete class.
-///
-/// Scene names are constants — no magic strings in callers.
-/// Access via <see cref="Instance"/> which returns <see cref="ISceneNavigator"/>.
+/// Persistent scene-transition service (survives scene loads).
+/// Implements <see cref="ISceneNavigator"/> so callers depend on the interface, not the concrete class.
 /// </summary>
 public class ScenesManager : MonoBehaviour, ISceneNavigator
 {
@@ -19,7 +15,7 @@ public class ScenesManager : MonoBehaviour, ISceneNavigator
 
     private static ScenesManager instance;
 
-    /// <summary>Returns the navigator interface. Performs a scene search on first access.</summary>
+    /// <summary>Returns the <see cref="ISceneNavigator"/> interface.</summary>
     public static ISceneNavigator Instance
     {
         get
@@ -43,23 +39,12 @@ public class ScenesManager : MonoBehaviour, ISceneNavigator
         }
     }
 
-    // -------------------------------------------------------------------------
-    // ISceneNavigator
-    // -------------------------------------------------------------------------
+    // ── ISceneNavigator ───────────────────────────────────────────────────────
 
-    public void LoadMainMenu()
-    {
-        SceneManager.LoadScene(MainSceneName);
-    }
+    public void LoadMainMenu()      => SceneManager.LoadScene(MainSceneName);
+    public void LoadGamePlayScene() => StartCoroutine(LoadAsyncScene(GamePlaySceneName));
 
-    public void LoadGamePlayScene()
-    {
-        StartCoroutine(LoadAsyncScene(GamePlaySceneName));
-    }
-
-    // -------------------------------------------------------------------------
-    // Internals
-    // -------------------------------------------------------------------------
+    // ── Internals ─────────────────────────────────────────────────────────────
 
     private IEnumerator LoadAsyncScene(string sceneName)
     {

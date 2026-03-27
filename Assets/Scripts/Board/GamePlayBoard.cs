@@ -6,20 +6,12 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Orchestrator for the gameplay scene.
-/// Owns the board data arrays and wires together the sub-systems:
-///   - BoardLogic      (pure, stateless algorithms)
-///   - GoalTracker     (goal state + events)
-///   - BrickFactory    (view creation)
-///   - BrickVisualConfig (sprite mapping)
-///
-/// All Singleton dependencies have been removed; references are injected via Inspector.
+/// Orchestrates the gameplay scene: wires together <see cref="BoardLogic"/>,
+/// <see cref="GoalTracker"/>, <see cref="BrickFactory"/>, and <see cref="BrickVisualConfig"/>.
 /// </summary>
 public class GamePlayBoard : MonoBehaviour
 {
-    // -------------------------------------------------------------------------
-    // Inspector references
-    // -------------------------------------------------------------------------
+    // ── Inspector ─────────────────────────────────────────────────────────────
 
     [Header("Data / Config")]
     [SerializeField] private LevelRepository   levelRepository;
@@ -27,9 +19,9 @@ public class GamePlayBoard : MonoBehaviour
     [SerializeField] private BrickVisualConfig visualConfig;
 
     [Header("Scene Components")]
-    [SerializeField] private BrickFactory    brickFactory;
-    [SerializeField] private SpriteRenderer  boardBackground;
-    [SerializeField] private Transform       bricksParent;
+    [SerializeField] private BrickFactory   brickFactory;
+    [SerializeField] private SpriteRenderer boardBackground;
+    [SerializeField] private Transform      bricksParent;
 
     [Header("UI")]
     [SerializeField] private Image           goalImage;
@@ -40,17 +32,13 @@ public class GamePlayBoard : MonoBehaviour
     [Header("Rules")]
     [SerializeField] private int minMatchCount = 2;
 
-    // -------------------------------------------------------------------------
-    // Constants
-    // -------------------------------------------------------------------------
+    // ── Constants ─────────────────────────────────────────────────────────────
 
     private const float BackgroundPadding  = 0.3f;
     private const float DropHeightOffset   = 2.3f;
     private const float ProcessLockSeconds = 0.4f;
 
-    // -------------------------------------------------------------------------
-    // Runtime state
-    // -------------------------------------------------------------------------
+    // ── Runtime state ─────────────────────────────────────────────────────────
 
     private LevelDetails levelDetails;
     private Brick[,]     bricks;
@@ -58,9 +46,7 @@ public class GamePlayBoard : MonoBehaviour
     private GoalTracker  goalTracker;
     private bool         isProcessing;
 
-    // -------------------------------------------------------------------------
-    // Unity lifecycle
-    // -------------------------------------------------------------------------
+    // ── Unity lifecycle ───────────────────────────────────────────────────────
 
     private void Awake()
     {
@@ -71,9 +57,7 @@ public class GamePlayBoard : MonoBehaviour
         Initialize();
     }
 
-    // -------------------------------------------------------------------------
-    // Initialisation
-    // -------------------------------------------------------------------------
+    // ── Initialisation ────────────────────────────────────────────────────────
 
     private void Initialize()
     {
@@ -131,9 +115,7 @@ public class GamePlayBoard : MonoBehaviour
         _   => BrickType.RANDOM_BRICK,
     };
 
-    // -------------------------------------------------------------------------
-    // Input handling
-    // -------------------------------------------------------------------------
+    // ── Input ─────────────────────────────────────────────────────────────────
 
     private void OnBrickClick(Brick clicked)
     {
@@ -146,9 +128,7 @@ public class GamePlayBoard : MonoBehaviour
         ProcessMatches(matches);
     }
 
-    // -------------------------------------------------------------------------
-    // Match processing
-    // -------------------------------------------------------------------------
+    // ── Match processing ──────────────────────────────────────────────────────
 
     private void ProcessMatches(List<Brick> matches)
     {
@@ -158,15 +138,14 @@ public class GamePlayBoard : MonoBehaviour
             brickShows[brick.X, brick.Y].Hide();
 
         BoardLogic.ApplyGravity(matches, bricks, OnBrickMoved);
-
         goalTracker.RegisterMatch(matchType, matches.Count);
 
         StartCoroutine(UnlockAfterDelay(ProcessLockSeconds));
     }
 
     /// <summary>
-    /// Called by <see cref="BoardLogic.ApplyGravity"/> for every position that changes.
-    /// <paramref name="from"/> is null when a brand-new random brick drops in from above.
+    /// Invoked by <see cref="BoardLogic.ApplyGravity"/> for each position that changes.
+    /// <paramref name="from"/> is <c>null</c> when a new random brick drops in from above.
     /// </summary>
     private void OnBrickMoved(Brick from, Brick to)
     {
@@ -184,13 +163,11 @@ public class GamePlayBoard : MonoBehaviour
         isProcessing = false;
     }
 
-    // -------------------------------------------------------------------------
-    // Victory / navigation
-    // -------------------------------------------------------------------------
+    // ── Victory / navigation ──────────────────────────────────────────────────
 
     private void ShowVictory()
     {
-        isProcessing = true; // block further input
+        isProcessing = true;
         victoryUI.SetActive(true);
     }
 

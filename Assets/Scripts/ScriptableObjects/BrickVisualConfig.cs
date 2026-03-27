@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Maps BrickType to its Sprite via the Inspector.
-/// Replaces the fragile index-based sprites[] array.
-/// Call Initialize() once before using GetSprite().
+/// Maps each <see cref="BrickType"/> to its sprite via the Inspector.
+/// Call <see cref="Initialize"/> once before using <see cref="GetSprite"/>.
 /// </summary>
 [CreateAssetMenu(fileName = "BrickVisualConfig", menuName = "Game/BrickVisualConfig")]
 public class BrickVisualConfig : ScriptableObject

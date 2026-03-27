@@ -1,6 +1,4 @@
-/// <summary>
-/// Abstracts scene-transition logic so callers depend on behaviour, not implementation.
-/// </summary>
+/// <summary>Defines scene-transition behaviour for the application.</summary>
 public interface ISceneNavigator
 {
     void LoadMainMenu();

@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Creates BrickShow GameObjects from Brick data.
-/// Extensible: add a new BrickType entry to <see cref="brickCreators"/> to support new brick kinds.
-///
-/// Singleton removed — attach to a GameObject in the scene and inject into
-/// <see cref="GamePlayBoard"/> via the Inspector.
+/// Instantiates <see cref="BrickShow"/> GameObjects from <see cref="Brick"/> data.
+/// To support a new brick type, add a matching entry to <see cref="brickCreators"/>.
 /// </summary>
 public class BrickFactory : MonoBehaviour
 {

@@ -1,9 +1,8 @@
 using UnityEngine;
 
 /// <summary>
-/// Holds transient session data shared across scenes.
-/// Replaces PlayerPrefs for in-memory cross-scene communication.
-/// Assign a single asset instance in the Inspector wherever needed.
+/// ScriptableObject that carries transient session data between scenes.
+/// Assign the same asset instance in every Inspector slot that needs it.
 /// </summary>
 [CreateAssetMenu(fileName = "GameSession", menuName = "Game/GameSession")]
 public class GameSession : ScriptableObject
