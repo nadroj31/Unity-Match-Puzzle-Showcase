@@ -2,27 +2,42 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>UI controller for the main menu and level-select screen.</summary>
+/// <summary>
+/// Controller for the main menu. Manages level data loading and button pooling;
+/// delegates all UI visibility changes to <see cref="MainMenuView"/> via <see cref="MainMenuViewModel"/>.
+/// </summary>
 public class MainMenu : MonoBehaviour
 {
+    // ── Inspector ─────────────────────────────────────────────────────────────
+
     [SerializeField] private LevelRepository levelRepository;
     [SerializeField] private Button          exitButton;
     [SerializeField] private Button          startButton;
-    [SerializeField] private GameObject      levelSelectUI;
     [SerializeField] private LevelButton     levelButtonPrefab;
     [SerializeField] private Transform       levelButtonParent;
+    [SerializeField] private MainMenuView    mainMenuView;
+
+    // ── Runtime state ─────────────────────────────────────────────────────────
 
     private readonly List<LevelButton> levelButtons = new List<LevelButton>();
+    private MainMenuViewModel          viewModel;
+
+    // ── Unity lifecycle ───────────────────────────────────────────────────────
 
     private void Awake()
     {
+        viewModel = new MainMenuViewModel();
+        mainMenuView.BindingContext = viewModel;
+
         exitButton.onClick.RemoveAllListeners();
         exitButton.onClick.AddListener(CloseLevelSelectMenu);
         startButton.onClick.RemoveAllListeners();
         startButton.onClick.AddListener(OpenLevelSelectMenu);
     }
 
-    private void CloseLevelSelectMenu() => levelSelectUI.SetActive(false);
+    // ── Menu actions ──────────────────────────────────────────────────────────
+
+    private void CloseLevelSelectMenu() => viewModel.IsLevelSelectOpen.Value = false;
 
     private void OpenLevelSelectMenu()
     {
@@ -46,6 +61,6 @@ public class MainMenu : MonoBehaviour
                 levelButtons[i].SetLevelText(levelKeys[i]);
         }
 
-        levelSelectUI.SetActive(true);
+        viewModel.IsLevelSelectOpen.Value = true;
     }
 }

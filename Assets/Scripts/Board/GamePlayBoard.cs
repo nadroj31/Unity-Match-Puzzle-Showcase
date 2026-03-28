@@ -1,13 +1,12 @@
-using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Orchestrates the gameplay scene: wires together <see cref="BoardLogic"/>,
-/// <see cref="GoalTracker"/>, <see cref="BrickFactory"/>, and <see cref="BrickVisualConfig"/>.
+/// Orchestrates the gameplay scene: owns board data, wires game-logic sub-systems
+/// (<see cref="BoardLogic"/>, <see cref="GoalTracker"/>, <see cref="BrickFactory"/>),
+/// and pushes observable state into <see cref="GamePlayViewModel"/> for the View layer.
 /// </summary>
 public class GamePlayBoard : MonoBehaviour
 {
@@ -22,12 +21,7 @@ public class GamePlayBoard : MonoBehaviour
     [SerializeField] private BrickFactory   brickFactory;
     [SerializeField] private SpriteRenderer boardBackground;
     [SerializeField] private Transform      bricksParent;
-
-    [Header("UI")]
-    [SerializeField] private Image           goalImage;
-    [SerializeField] private TextMeshProUGUI goalText;
-    [SerializeField] private GameObject      victoryUI;
-    [SerializeField] private Button          goBackButton;
+    [SerializeField] private GamePlayView   gamePlayView;
 
     [Header("Rules")]
     [SerializeField] private int minMatchCount = 2;
@@ -40,18 +34,21 @@ public class GamePlayBoard : MonoBehaviour
 
     // ── Runtime state ─────────────────────────────────────────────────────────
 
-    private LevelDetails levelDetails;
-    private Brick[,]     bricks;
-    private BrickShow[,] brickShows;
-    private GoalTracker  goalTracker;
-    private bool         isProcessing;
+    private LevelDetails      levelDetails;
+    private Brick[,]          bricks;
+    private BrickShow[,]      brickShows;
+    private GoalTracker       goalTracker;
+    private GamePlayViewModel viewModel;
+    private bool              isProcessing;
 
     // ── Unity lifecycle ───────────────────────────────────────────────────────
 
     private void Awake()
     {
-        goBackButton.onClick.RemoveAllListeners();
-        goBackButton.onClick.AddListener(GoBack);
+        // Create ViewModel and bind the View BEFORE Initialize() so that
+        // property assignments inside SetupGoal fire ValueChanged on the View.
+        viewModel = new GamePlayViewModel();
+        gamePlayView.BindingContext = viewModel;
 
         levelDetails = levelRepository.GetLevelDetails(gameSession.SelectedLevel);
         Initialize();
@@ -97,13 +94,15 @@ public class GamePlayBoard : MonoBehaviour
     private void SetupGoal()
     {
         BrickType goalType = ParseGoalType(levelDetails.goal);
-
         goalTracker = new GoalTracker(goalType, levelDetails.goalNumber);
-        goalTracker.OnGoalCountChanged += count => goalText.text = count.ToString();
-        goalTracker.OnGoalCompleted    += ShowVictory;
 
-        goalImage.sprite = visualConfig.GetSprite(goalType);
-        goalText.text    = levelDetails.goalNumber.ToString();
+        // Bridge GoalTracker events into ViewModel observables
+        goalTracker.OnGoalCountChanged += count => viewModel.GoalRemaining.Value = count;
+        goalTracker.OnGoalCompleted    += OnGoalCompleted;
+
+        // Push initial state — fires ValueChanged because ViewModel defaults differ
+        viewModel.GoalSprite.Value    = visualConfig.GetSprite(goalType);
+        viewModel.GoalRemaining.Value = levelDetails.goalNumber;
     }
 
     private static BrickType ParseGoalType(string code) => code switch
@@ -163,17 +162,11 @@ public class GamePlayBoard : MonoBehaviour
         isProcessing = false;
     }
 
-    // ── Victory / navigation ──────────────────────────────────────────────────
+    // ── Victory ───────────────────────────────────────────────────────────────
 
-    private void ShowVictory()
+    private void OnGoalCompleted()
     {
-        isProcessing = true;
-        victoryUI.SetActive(true);
-    }
-
-    private void GoBack()
-    {
-        DOTween.KillAll();
-        ScenesManager.Instance.LoadMainMenu();
+        isProcessing = true;           // block further input
+        viewModel.IsVictory.Value = true; // View handles victoryUI via binding
     }
 }

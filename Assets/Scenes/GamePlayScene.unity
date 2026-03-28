@@ -567,10 +567,7 @@ MonoBehaviour:
   brickFactory: {fileID: 462278804}
   boardBackground: {fileID: 321177297}
   bricksParent: {fileID: 2019421834}
-  goalImage: {fileID: 1610912768}
-  goalText: {fileID: 1676800898}
-  victoryUI: {fileID: 1323181615}
-  goBackButton: {fileID: 2000806428}
+  gamePlayView: {fileID: 1870853967}
   minMatchCount: 2
 --- !u!114 &462278804
 MonoBehaviour:
@@ -1284,6 +1281,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1870853966}
+  - component: {fileID: 1870853967}
   m_Layer: 5
   m_Name: UI
   m_TagString: Untagged
@@ -1307,6 +1305,22 @@ Transform:
   - {fileID: 1030523857}
   m_Father: {fileID: 462278802}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1870853967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1870853965}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffd1971e0c8951241905e8fe19c1077c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GamePlayView
+  goalImage: {fileID: 1610912768}
+  goalText: {fileID: 1676800898}
+  victoryUI: {fileID: 1323181615}
+  goBackButton: {fileID: 2000806428}
 --- !u!1 &1893035284
 GameObject:
   m_ObjectHideFlags: 0
