@@ -1,12 +1,13 @@
 using DG.Tweening;
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// View component for a single board cell.
 /// Handles sprite display, click forwarding, and drop animations.
 /// </summary>
-public class BrickShow : MonoBehaviour
+public class BrickShow : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private SpriteRenderer spriteRenderer;
 
@@ -31,7 +32,7 @@ public class BrickShow : MonoBehaviour
 
     // ── Input ─────────────────────────────────────────────────────────────────
 
-    private void OnMouseUp() => onClick?.Invoke(brick);
+    public void OnPointerClick(PointerEventData eventData) => onClick?.Invoke(brick);
 
     // ── Animation ─────────────────────────────────────────────────────────────
 
