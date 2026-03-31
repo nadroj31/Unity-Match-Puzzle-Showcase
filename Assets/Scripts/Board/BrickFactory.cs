@@ -9,6 +9,10 @@ public class BrickFactory : MonoBehaviour
 {
     [SerializeField] private GameObject brickPrefab;
 
+    /// <summary>
+    /// Instantiates a <see cref="BrickShow"/> for <paramref name="brick"/> under <paramref name="parent"/>.
+    /// Returns <c>null</c> for <see cref="BrickTypeSO.isNone"/> bricks (empty cells).
+    /// </summary>
     public virtual BrickShow CreateBrick(Brick brick, Transform parent)
     {
         if (brick.BrickType.isNone)

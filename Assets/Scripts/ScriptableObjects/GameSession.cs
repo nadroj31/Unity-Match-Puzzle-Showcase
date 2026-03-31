@@ -7,5 +7,6 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "GameSession", menuName = "Game/GameSession")]
 public class GameSession : ScriptableObject
 {
+    /// <summary>Level number chosen on the main menu; read by the gameplay scene on load.</summary>
     public int SelectedLevel;
 }

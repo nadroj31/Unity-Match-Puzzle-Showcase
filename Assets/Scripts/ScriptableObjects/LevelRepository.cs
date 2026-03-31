@@ -11,6 +11,7 @@ public class LevelRepository : ScriptableObject
 
     private readonly Dictionary<int, LevelDetails> levels = new Dictionary<int, LevelDetails>();
 
+    /// <summary>Clears the cache and reloads all JSON files from <c>Resources/LevelInfos</c>. Call once before accessing level data.</summary>
     public void LoadLevelData()
     {
         levels.Clear();
@@ -43,6 +44,7 @@ public class LevelRepository : ScriptableObject
         }
     }
 
+    /// <summary>Returns the cached <see cref="LevelDetails"/> for <paramref name="level"/>, or <c>null</c> if not found.</summary>
     public LevelDetails GetLevelDetails(int level)
     {
         if (levels.TryGetValue(level, out var value))
@@ -52,5 +54,6 @@ public class LevelRepository : ScriptableObject
         return null;
     }
 
+    /// <summary>Returns all cached level numbers.</summary>
     public List<int> GetAllLevelKeys() => new List<int>(levels.Keys);
 }

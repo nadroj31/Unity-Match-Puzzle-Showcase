@@ -52,7 +52,7 @@ public class ScenesManager : MonoBehaviour, ISceneNavigator
 
         var asyncLoad = SceneManager.LoadSceneAsync(sceneName);
         yield return new WaitUntil(() => asyncLoad.isDone);
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.5f); // brief hold so the loading UI isn't a flash
 
         loadingUI.SetActive(false);
     }

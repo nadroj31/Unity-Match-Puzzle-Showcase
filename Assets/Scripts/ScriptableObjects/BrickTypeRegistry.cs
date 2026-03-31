@@ -8,13 +8,13 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "BrickTypeRegistry", menuName = "Game/Brick Type Registry")]
 public class BrickTypeRegistry : ScriptableObject
 {
-    [Tooltip("The empty / destroyed-cell placeholder type.")]
+    [Tooltip("Empty/destroyed-cell placeholder type.")]
     [SerializeField] private BrickTypeSO noneType;
 
-    [Tooltip("The wildcard goal type — matches any colour.")]
+    [Tooltip("Wildcard goal type — matches any colour.")]
     [SerializeField] private BrickTypeSO randomType;
 
-    [Tooltip("All playable colour types. These are the types that appear on the board and are picked at random when refilling.")]
+    [Tooltip("All playable colour types; used on the board and picked at random when refilling.")]
     [SerializeField] private BrickTypeSO[] playableTypes;
 
     /// <summary>The empty / destroyed-cell placeholder.</summary>
