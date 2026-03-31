@@ -1,11 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 /// <summary>
 /// Orchestrates the gameplay scene: owns board data, wires game-logic sub-systems
-/// (<see cref="BoardLogic"/>, <see cref="GoalTracker"/>, <see cref="BrickFactory"/>),
+/// (<see cref="BoardLogic"/>, <see cref="IWinCondition"/>, <see cref="BrickFactory"/>),
 /// and pushes observable state into <see cref="GamePlayViewModel"/> for the View layer.
 /// </summary>
 public class GamePlayBoard : MonoBehaviour
@@ -25,7 +24,8 @@ public class GamePlayBoard : MonoBehaviour
     [SerializeField] private GamePlayView   gamePlayView;
 
     [Header("Rules")]
-    [SerializeField] private int minMatchCount = 2;
+    [SerializeField] private int            minMatchCount = 2;
+    [SerializeField] private MonoBehaviour  winConditionBehaviour;
 
     // ── Constants ─────────────────────────────────────────────────────────────
 
@@ -38,7 +38,7 @@ public class GamePlayBoard : MonoBehaviour
     private LevelDetails      levelDetails;
     private Brick[,]          bricks;
     private BrickShow[,]      brickShows;
-    private GoalTracker       goalTracker;
+    private IWinCondition     winCondition;
     private GamePlayViewModel viewModel;
     private bool              isProcessing;
 
@@ -47,7 +47,7 @@ public class GamePlayBoard : MonoBehaviour
     private void Awake()
     {
         // Create ViewModel and bind the View BEFORE Initialize() so that
-        // property assignments inside SetupGoal fire ValueChanged on the View.
+        // property assignments inside SetupWinCondition fire ValueChanged on the View.
         viewModel = new GamePlayViewModel();
         gamePlayView.BindingContext = viewModel;
 
@@ -69,7 +69,7 @@ public class GamePlayBoard : MonoBehaviour
         brickShows = new BrickShow[levelDetails.gridWidth, levelDetails.gridHeight];
 
         PopulateBricks();
-        SetupGoal();
+        SetupWinCondition();
     }
 
     private void PopulateBricks()
@@ -92,18 +92,11 @@ public class GamePlayBoard : MonoBehaviour
         }
     }
 
-    private void SetupGoal()
+    private void SetupWinCondition()
     {
-        BrickTypeSO goalType = brickTypeRegistry.GetByCode(levelDetails.goal);
-        goalTracker = new GoalTracker(goalType, levelDetails.goalNumber);
-
-        // Bridge GoalTracker events into ViewModel observables
-        goalTracker.OnGoalCountChanged += count => viewModel.GoalRemaining.Value = count;
-        goalTracker.OnGoalCompleted    += OnGoalCompleted;
-
-        // Push initial state — fires ValueChanged because ViewModel defaults differ
-        viewModel.GoalSprite.Value    = visualConfig.GetSprite(goalType);
-        viewModel.GoalRemaining.Value = levelDetails.goalNumber;
+        winCondition = (IWinCondition)winConditionBehaviour;
+        winCondition.Initialize(levelDetails, brickTypeRegistry, visualConfig, viewModel);
+        winCondition.OnCompleted += OnWinConditionCompleted;
     }
 
     // ── Input ─────────────────────────────────────────────────────────────────
@@ -129,7 +122,7 @@ public class GamePlayBoard : MonoBehaviour
             brickShows[brick.X, brick.Y].Hide();
 
         BoardLogic.ApplyGravity(matches, bricks, brickTypeRegistry, OnBrickMoved);
-        goalTracker.RegisterMatch(matchType, matches.Count);
+        winCondition.OnMatchMade(matchType, matches.Count);
 
         StartCoroutine(UnlockAfterDelay(ProcessLockSeconds));
     }
@@ -156,7 +149,7 @@ public class GamePlayBoard : MonoBehaviour
 
     // ── Victory ───────────────────────────────────────────────────────────────
 
-    private void OnGoalCompleted()
+    private void OnWinConditionCompleted()
     {
         isProcessing = true;              // block further input
         viewModel.IsVictory.Value = true; // View handles victoryUI via binding
