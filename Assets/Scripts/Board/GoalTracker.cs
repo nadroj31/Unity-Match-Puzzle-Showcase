@@ -12,10 +12,10 @@ public class GoalTracker
     /// <summary>Fired once when the remaining count reaches zero.</summary>
     public event Action OnGoalCompleted;
 
-    public BrickType GoalType  { get; }
-    public int       Remaining { get; private set; }
+    public BrickTypeSO GoalType  { get; }
+    public int         Remaining { get; private set; }
 
-    public GoalTracker(BrickType goalType, int count)
+    public GoalTracker(BrickTypeSO goalType, int count)
     {
         GoalType  = goalType;
         Remaining = count;
@@ -23,11 +23,11 @@ public class GoalTracker
 
     /// <summary>
     /// Registers a completed match. Decrements the counter when the matched type qualifies.
-    /// <see cref="BrickType.RANDOM_BRICK"/> as goal type accepts any colour.
+    /// A goal whose <see cref="BrickTypeSO.isRandom"/> flag is set accepts any colour.
     /// </summary>
-    public void RegisterMatch(BrickType matchedType, int count)
+    public void RegisterMatch(BrickTypeSO matchedType, int count)
     {
-        if (GoalType != BrickType.RANDOM_BRICK && GoalType != matchedType)
+        if (!GoalType.isRandom && GoalType != matchedType)
             return;
 
         Remaining = Mathf.Max(Remaining - count, 0);

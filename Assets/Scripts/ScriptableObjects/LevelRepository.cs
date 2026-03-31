@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,12 +7,13 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "LevelRepository", menuName = "Game/LevelRepository")]
 public class LevelRepository : ScriptableObject
 {
+    [SerializeField] private BrickTypeRegistry brickTypeRegistry;
+
     private readonly Dictionary<int, LevelDetails> levels = new Dictionary<int, LevelDetails>();
 
     public void LoadLevelData()
     {
         levels.Clear();
-        BrickType[] brickTypes = (BrickType[])Enum.GetValues(typeof(BrickType));
 
         foreach (var jsonFile in Resources.LoadAll<TextAsset>("LevelInfos"))
         {
@@ -26,7 +26,7 @@ public class LevelRepository : ScriptableObject
                 gridHeight  = info.gridHeight,
                 goal        = info.goal,
                 goalNumber  = info.goalNumber,
-                gridData    = new BrickType[info.gridWidth, info.gridHeight]
+                gridData    = new BrickTypeSO[info.gridWidth, info.gridHeight]
             };
 
             int gridIndex = 0;
@@ -35,14 +35,7 @@ public class LevelRepository : ScriptableObject
             {
                 for (int col = 0; col < info.gridWidth; col++)
                 {
-                    details.gridData[col, row] = info.grid[gridIndex++] switch
-                    {
-                        "b" => BrickType.BLUE_BRICK,
-                        "g" => BrickType.GREEN_BRICK,
-                        "r" => BrickType.RED_BRICK,
-                        "y" => BrickType.YELLOW_BRICK,
-                        _   => brickTypes[UnityEngine.Random.Range(2, brickTypes.Length)]
-                    };
+                    details.gridData[col, row] = brickTypeRegistry.GetByCode(info.grid[gridIndex++]);
                 }
             }
 

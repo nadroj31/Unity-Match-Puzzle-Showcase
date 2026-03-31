@@ -13,7 +13,7 @@ public static class BoardLogic
 
     /// <summary>
     /// Returns all bricks orthogonally connected to <paramref name="startBrick"/>
-    /// that share the same <see cref="BrickType"/>. Uses iterative BFS.
+    /// that share the same <see cref="BrickTypeSO"/>. Uses iterative BFS.
     /// </summary>
     public static List<Brick> FindMatchBricks(Brick startBrick, Brick[,] board)
     {
@@ -54,8 +54,8 @@ public static class BoardLogic
 
     /// <summary>
     /// Collapses each affected column after bricks are removed; fills vacated top
-    /// slots with new random bricks. Fires <paramref name="onBrickMoved"/> for every
-    /// position that changes:
+    /// slots with new random bricks from <paramref name="registry"/>. Fires
+    /// <paramref name="onBrickMoved"/> for every position that changes:
     /// <list type="bullet">
     ///   <item>(sourceBrick, targetBrick) — existing brick slides down</item>
     ///   <item>(null, targetBrick)        — new random brick drops in from above</item>
@@ -64,6 +64,7 @@ public static class BoardLogic
     public static void ApplyGravity(
         List<Brick>          removedBricks,
         Brick[,]             board,
+        BrickTypeRegistry    registry,
         Action<Brick, Brick> onBrickMoved)
     {
         int height = board.GetLength(1);
@@ -97,18 +98,9 @@ public static class BoardLogic
             // Fill vacated top slots with random bricks
             for (int y = survivors.Count; y < height; y++)
             {
-                board[col, y].SetBrickType(GetRandomBrickType());
+                board[col, y].SetBrickType(registry.GetRandom());
                 onBrickMoved?.Invoke(null, board[col, y]);
             }
         }
-    }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
-    /// <summary>Returns a random colour brick type, excluding NONE and RANDOM_BRICK.</summary>
-    public static BrickType GetRandomBrickType()
-    {
-        BrickType[] types = (BrickType[])Enum.GetValues(typeof(BrickType));
-        return types[UnityEngine.Random.Range(2, types.Length)];
     }
 }

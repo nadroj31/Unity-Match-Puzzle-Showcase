@@ -6,5 +6,5 @@ public class LevelDetails
     public int          gridHeight;
     public string       goal;
     public int          goalNumber;
-    public BrickType[,] gridData;
+    public BrickTypeSO[,] gridData;
 }

@@ -5,10 +5,10 @@ public class Brick
 {
     public int       X         { get; private set; }
     public int       Y         { get; private set; }
-    public BrickType BrickType { get; private set; }
+    public BrickTypeSO BrickType { get; private set; }
     public Vector2   Position  { get; private set; }
 
-    public Brick(int x, int y, BrickType brickType)
+    public Brick(int x, int y, BrickTypeSO brickType)
     {
         X         = x;
         Y         = y;
@@ -23,7 +23,7 @@ public class Brick
         Position = new Vector2(-gridWidth / 2 + xOffset + X, -gridHeight / 2 + yOffset + Y);
     }
 
-    public void SetBrickType(BrickType brickType)
+    public void SetBrickType(BrickTypeSO brickType)
     {
         BrickType = brickType;
     }
