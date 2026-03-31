@@ -14,7 +14,7 @@ public class BrickTypeRegistry : ScriptableObject
     [Tooltip("Wildcard goal type — matches any colour.")]
     [SerializeField] private BrickTypeSO randomType;
 
-    [Tooltip("All playable colour types; used on the board and picked at random when refilling.")]
+    [Tooltip("All playable colour types; used on the board and picked at random when refilling. Must contain at least one entry.")]
     [SerializeField] private BrickTypeSO[] playableTypes;
 
     /// <summary>The empty / destroyed-cell placeholder.</summary>
@@ -23,9 +23,16 @@ public class BrickTypeRegistry : ScriptableObject
     /// <summary>The wildcard goal type — matches any colour.</summary>
     public BrickTypeSO RandomType => randomType;
 
-    /// <summary>Returns a uniformly random playable brick type.</summary>
+    /// <summary>Returns a uniformly random playable brick type. Requires at least one entry in <c>playableTypes</c>.</summary>
     public BrickTypeSO GetRandom()
-        => playableTypes[Random.Range(0, playableTypes.Length)];
+    {
+        if (playableTypes == null || playableTypes.Length == 0)
+        {
+            Debug.LogError("[BrickTypeRegistry] playableTypes is empty — cannot pick a random type.");
+            return null;
+        }
+        return playableTypes[Random.Range(0, playableTypes.Length)];
+    }
 
     /// <summary>
     /// Looks up a playable type by its JSON character code for use in grid cells.

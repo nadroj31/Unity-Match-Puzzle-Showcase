@@ -10,6 +10,7 @@ public class MainMenu : MonoBehaviour
 {
     // ── Inspector ─────────────────────────────────────────────────────────────
 
+    [Tooltip("ScriptableObject that implements ILevelLoader (e.g. LevelRepository).")]
     [SerializeField] private ScriptableObject levelLoaderAsset;
     [SerializeField] private Button          exitButton;
     [SerializeField] private Button          startButton;
@@ -27,7 +28,12 @@ public class MainMenu : MonoBehaviour
 
     private void Awake()
     {
-        levelLoader = (ILevelLoader)levelLoaderAsset;
+        levelLoader = levelLoaderAsset as ILevelLoader;
+        if (levelLoader == null)
+        {
+            Debug.LogError("[MainMenu] levelLoaderAsset does not implement ILevelLoader.", this);
+            return;
+        }
 
         viewModel = new MainMenuViewModel();
         mainMenuView.BindingContext = viewModel;

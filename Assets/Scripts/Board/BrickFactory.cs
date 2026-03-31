@@ -7,6 +7,7 @@ using UnityEngine;
 /// </summary>
 public class BrickFactory : MonoBehaviour
 {
+    [Tooltip("Prefab to instantiate for each brick. Must have a BrickShow component.")]
     [SerializeField] private GameObject brickPrefab;
 
     /// <summary>
@@ -22,6 +23,13 @@ public class BrickFactory : MonoBehaviour
         go.name = $"Brick({brick.X},{brick.Y})";
 
         var brickShow = go.GetComponent<BrickShow>();
+        if (brickShow == null)
+        {
+            Debug.LogError("[BrickFactory] brickPrefab does not have a BrickShow component.", go);
+            Destroy(go);
+            return null;
+        }
+
         brickShow.SetData(brick);
         return brickShow;
     }

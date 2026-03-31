@@ -12,6 +12,7 @@ public class GamePlayBoard : MonoBehaviour
     // ── Inspector ─────────────────────────────────────────────────────────────
 
     [Header("Data / Config")]
+    [Tooltip("ScriptableObject that implements ILevelLoader (e.g. LevelRepository).")]
     [SerializeField] private ScriptableObject  levelLoaderAsset;
     [SerializeField] private GameSession       gameSession;
     [SerializeField] private BrickVisualConfig visualConfig;
@@ -24,8 +25,9 @@ public class GamePlayBoard : MonoBehaviour
     [SerializeField] private GamePlayView   gamePlayView;
 
     [Header("Rules")]
-    [SerializeField] private int            minMatchCount = 2;
-    [SerializeField] private MonoBehaviour  winConditionBehaviour;
+    [SerializeField] private int           minMatchCount = 2;
+    [Tooltip("MonoBehaviour that implements IWinCondition (e.g. ClearGoalWinCondition). Must be on a GameObject in this scene.")]
+    [SerializeField] private MonoBehaviour winConditionBehaviour;
 
     // ── Constants ─────────────────────────────────────────────────────────────
 
@@ -47,7 +49,19 @@ public class GamePlayBoard : MonoBehaviour
 
     private void Awake()
     {
-        levelLoader = (ILevelLoader)levelLoaderAsset;
+        levelLoader = levelLoaderAsset as ILevelLoader;
+        if (levelLoader == null)
+        {
+            Debug.LogError("[GamePlayBoard] levelLoaderAsset does not implement ILevelLoader.", this);
+            return;
+        }
+
+        winCondition = winConditionBehaviour as IWinCondition;
+        if (winCondition == null)
+        {
+            Debug.LogError("[GamePlayBoard] winConditionBehaviour does not implement IWinCondition.", this);
+            return;
+        }
 
         // Create ViewModel and bind the View BEFORE Initialize() so that
         // property assignments inside SetupWinCondition fire ValueChanged on the View.
@@ -55,6 +69,12 @@ public class GamePlayBoard : MonoBehaviour
         gamePlayView.BindingContext = viewModel;
 
         levelDetails = levelLoader.GetLevelDetails(gameSession.SelectedLevel);
+        if (levelDetails == null)
+        {
+            Debug.LogError($"[GamePlayBoard] No level data for level {gameSession.SelectedLevel}.", this);
+            return;
+        }
+
         Initialize();
     }
 
@@ -86,7 +106,7 @@ public class GamePlayBoard : MonoBehaviour
                 bricks[x, y] = brick;
 
                 BrickShow brickShow = brickFactory.CreateBrick(brick, bricksParent);
-                if (brickShow == null) continue;
+                if (brickShow == null) continue; // isNone bricks have no view
 
                 brickShow.SetSprite(visualConfig.GetSprite(brick.BrickType));
                 brickShow.SetOnClickAction(OnBrickClick);
@@ -97,7 +117,6 @@ public class GamePlayBoard : MonoBehaviour
 
     private void SetupWinCondition()
     {
-        winCondition = (IWinCondition)winConditionBehaviour;
         winCondition.Initialize(levelDetails, brickTypeRegistry, visualConfig, viewModel);
         winCondition.OnCompleted += OnWinConditionCompleted;
     }
@@ -137,6 +156,8 @@ public class GamePlayBoard : MonoBehaviour
     private void OnBrickMoved(Brick from, Brick to)
     {
         BrickShow show = brickShows[to.X, to.Y];
+        if (show == null) return; // isNone cell — no view to update
+
         show.Show();
         show.SetSprite(visualConfig.GetSprite(from?.BrickType ?? to.BrickType));
         show.TweenMove(

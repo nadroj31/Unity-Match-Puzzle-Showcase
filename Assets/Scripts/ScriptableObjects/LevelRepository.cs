@@ -7,6 +7,7 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "LevelRepository", menuName = "Game/LevelRepository")]
 public class LevelRepository : ScriptableObject, ILevelLoader
 {
+    [Tooltip("Must be the same BrickTypeRegistry asset used by GamePlayBoard and BrickVisualConfig.")]
     [SerializeField] private BrickTypeRegistry brickTypeRegistry;
 
     private readonly Dictionary<int, LevelDetails> levels = new Dictionary<int, LevelDetails>();
