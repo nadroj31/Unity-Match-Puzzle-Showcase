@@ -552,6 +552,7 @@ GameObject:
   - component: {fileID: 462278802}
   - component: {fileID: 462278803}
   - component: {fileID: 462278804}
+  - component: {fileID: 462278805}
   m_Layer: 0
   m_Name: GamePlay
   m_TagString: Untagged
@@ -589,14 +590,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c45a92de5ce231b4d921a0b45148f60e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelRepository: {fileID: 11400000, guid: 99286ef7497b0a042ad72b2ab6242d30, type: 2}
+  levelLoaderAsset: {fileID: 11400000, guid: 99286ef7497b0a042ad72b2ab6242d30, type: 2}
   gameSession: {fileID: 11400000, guid: 16cfe907e64abe0418b69032f7dd507b, type: 2}
   visualConfig: {fileID: 11400000, guid: 503161491befb5d4fa1fbaaf375e0da8, type: 2}
+  brickTypeRegistry: {fileID: 11400000, guid: 5774af223857aec4c8676aa2510672c0, type: 2}
   brickFactory: {fileID: 462278804}
   boardBackground: {fileID: 321177297}
   bricksParent: {fileID: 2019421834}
   gamePlayView: {fileID: 1870853967}
   minMatchCount: 2
+  winConditionBehaviour: {fileID: 462278805}
 --- !u!114 &462278804
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -610,6 +613,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   brickPrefab: {fileID: 1533922246281842344, guid: 65144de1e70a20d47a656a7a98a29a15, type: 3}
+--- !u!114 &462278805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 462278801}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d90bafef34224c46b53cc2f3c951908, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ClearGoalWinCondition
 --- !u!1 &479495549
 GameObject:
   m_ObjectHideFlags: 0

@@ -164,7 +164,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 269dc54ee3c86754bbfaea21e2f3e135, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelRepository: {fileID: 11400000, guid: 99286ef7497b0a042ad72b2ab6242d30, type: 2}
+  levelLoaderAsset: {fileID: 11400000, guid: 99286ef7497b0a042ad72b2ab6242d30, type: 2}
   exitButton: {fileID: 1688411712}
   startButton: {fileID: 581768632}
   levelButtonPrefab: {fileID: 5001930072783940410, guid: 65a239a1a0aa18d46ba6619ad23ee8c7, type: 3}

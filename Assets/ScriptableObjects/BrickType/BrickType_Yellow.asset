@@ -9,7 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75296ac5eb5348c418c16d0301963b92, type: 3}
-  m_Name: LevelRepository
-  m_EditorClassIdentifier: Assembly-CSharp::LevelRepository
-  brickTypeRegistry: {fileID: 11400000, guid: 5774af223857aec4c8676aa2510672c0, type: 2}
+  m_Script: {fileID: 11500000, guid: bf2fb235b8e22034392ada3493d56eb5, type: 3}
+  m_Name: BrickType_Yellow
+  m_EditorClassIdentifier: Assembly-CSharp::BrickTypeSO
+  code: y
+  isNone: 0
+  isRandom: 0

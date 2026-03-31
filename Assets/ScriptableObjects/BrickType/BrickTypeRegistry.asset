@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b361f5ca32e002447a0a330c5a97710f, type: 3}
+  m_Name: BrickTypeRegistry
+  m_EditorClassIdentifier: Assembly-CSharp::BrickTypeRegistry
+  noneType: {fileID: 11400000, guid: 94256a2e00bc749409dd7108d2f0e66f, type: 2}
+  randomType: {fileID: 11400000, guid: 7fab419e2e81694498bbfa471c9b354e, type: 2}
+  playableTypes:
+  - {fileID: 11400000, guid: 58eaa7bd2eb9e3c4a9eaa05564f31118, type: 2}
+  - {fileID: 11400000, guid: 682bafd153d9a2a41ae67193adfe3c3e, type: 2}
+  - {fileID: 11400000, guid: cb5ec078b91d33f4ebcb168074b0eba5, type: 2}
+  - {fileID: 11400000, guid: 94a73e6f59ddab540ab042f7df65b6aa, type: 2}
