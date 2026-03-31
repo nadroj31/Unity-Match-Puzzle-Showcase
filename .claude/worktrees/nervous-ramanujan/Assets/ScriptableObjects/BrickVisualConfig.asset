@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 077ba0a62ee518b4e9c4663df3f971c3, type: 3}
+  m_Name: BrickVisualConfig
+  m_EditorClassIdentifier: Assembly-CSharp::BrickVisualConfig
+  visuals:
+  - brickType: 2
+    sprite: {fileID: 21300000, guid: 606a01e8c46399545be074ba2472c25e, type: 3}
+  - brickType: 3
+    sprite: {fileID: 21300000, guid: adf2ef6d996c70448a667a7f0c5ae755, type: 3}
+  - brickType: 4
+    sprite: {fileID: 21300000, guid: 2160c12f46b01a84c9faa931bc46b8f8, type: 3}
+  - brickType: 5
+    sprite: {fileID: 21300000, guid: d050579ba5bdc364388b7090037bdb97, type: 3}
+  - brickType: 1
+    sprite: {fileID: 21300000, guid: e5314213a9212924c841ade0c3d6b463, type: 3}

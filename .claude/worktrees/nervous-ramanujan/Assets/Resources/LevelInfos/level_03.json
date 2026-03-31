@@ -1,0 +1,8 @@
+{
+       "levelNumber": 3,
+       "gridWidth": 7,
+       "gridHeight": 7,
+       "goal": "r",
+       "goalNumber": 30,
+       "grid": ["y", "y", "random", "random", "random", "g", "g", "y", "y", "random", "random", "random", "g", "g", "random", "random", "random", "random", "random", "random", "random", "random", "random", "random", "random", "random", "random", "random", "random", "random", "random", "b", "random", "random", "random", "b", "b", "b", "b", "b", "b", "b", "b", "b", "b", "b", "b", "b", "b"]
+}

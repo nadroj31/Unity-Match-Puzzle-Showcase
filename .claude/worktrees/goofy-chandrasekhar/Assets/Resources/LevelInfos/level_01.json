@@ -1,0 +1,8 @@
+{
+       "levelNumber": 1,
+       "gridWidth": 5,
+       "gridHeight": 5,
+       "goal": "b",
+       "goalNumber": 20,
+       "grid": ["g", "g", "r", "g", "g", "g", "g", "r", "g", "g", "r", "r", "r", "r", "r", "y", "y", "r", "b", "b", "y", "y", "r", "b", "b"]
+}
