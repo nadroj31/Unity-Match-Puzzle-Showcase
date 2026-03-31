@@ -16,6 +16,7 @@ public class GamePlayBoard : MonoBehaviour
     [SerializeField] private LevelRepository   levelRepository;
     [SerializeField] private GameSession       gameSession;
     [SerializeField] private BrickVisualConfig visualConfig;
+    [SerializeField] private BrickTypeRegistry brickTypeRegistry;
 
     [Header("Scene Components")]
     [SerializeField] private BrickFactory   brickFactory;
@@ -93,7 +94,7 @@ public class GamePlayBoard : MonoBehaviour
 
     private void SetupGoal()
     {
-        BrickType goalType = ParseGoalType(levelDetails.goal);
+        BrickTypeSO goalType = brickTypeRegistry.GetByCode(levelDetails.goal);
         goalTracker = new GoalTracker(goalType, levelDetails.goalNumber);
 
         // Bridge GoalTracker events into ViewModel observables
@@ -104,15 +105,6 @@ public class GamePlayBoard : MonoBehaviour
         viewModel.GoalSprite.Value    = visualConfig.GetSprite(goalType);
         viewModel.GoalRemaining.Value = levelDetails.goalNumber;
     }
-
-    private static BrickType ParseGoalType(string code) => code switch
-    {
-        "b" => BrickType.BLUE_BRICK,
-        "g" => BrickType.GREEN_BRICK,
-        "y" => BrickType.YELLOW_BRICK,
-        "r" => BrickType.RED_BRICK,
-        _   => BrickType.RANDOM_BRICK,
-    };
 
     // ── Input ─────────────────────────────────────────────────────────────────
 
@@ -131,12 +123,12 @@ public class GamePlayBoard : MonoBehaviour
 
     private void ProcessMatches(List<Brick> matches)
     {
-        BrickType matchType = matches[0].BrickType;
+        BrickTypeSO matchType = matches[0].BrickType;
 
         foreach (var brick in matches)
             brickShows[brick.X, brick.Y].Hide();
 
-        BoardLogic.ApplyGravity(matches, bricks, OnBrickMoved);
+        BoardLogic.ApplyGravity(matches, bricks, brickTypeRegistry, OnBrickMoved);
         goalTracker.RegisterMatch(matchType, matches.Count);
 
         StartCoroutine(UnlockAfterDelay(ProcessLockSeconds));
@@ -166,7 +158,7 @@ public class GamePlayBoard : MonoBehaviour
 
     private void OnGoalCompleted()
     {
-        isProcessing = true;           // block further input
+        isProcessing = true;              // block further input
         viewModel.IsVictory.Value = true; // View handles victoryUI via binding
     }
 }
