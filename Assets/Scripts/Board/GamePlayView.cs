@@ -12,6 +12,7 @@ public class GamePlayView : ViewBase<GamePlayViewModel>
     // ── Inspector ─────────────────────────────────────────────────────────────
 
     [SerializeField] private Image           goalImage;
+    [SerializeField] private GameObject      goalCountLabel;
     [SerializeField] private TextMeshProUGUI goalText;
     [SerializeField] private GameObject      victoryUI;
     [SerializeField] private Button          goBackButton;
@@ -29,6 +30,7 @@ public class GamePlayView : ViewBase<GamePlayViewModel>
     protected override void OnInitialize()
     {
         base.OnInitialize();
+        Binder.Add<bool>  (nameof(GamePlayViewModel.IsGoalRandom),  OnIsGoalRandomChanged);
         Binder.Add<Sprite>(nameof(GamePlayViewModel.GoalSprite),    OnGoalSpriteChanged);
         Binder.Add<int>   (nameof(GamePlayViewModel.GoalRemaining), OnGoalRemainingChanged);
         Binder.Add<bool>  (nameof(GamePlayViewModel.IsVictory),     OnIsVictoryChanged);
@@ -38,6 +40,12 @@ public class GamePlayView : ViewBase<GamePlayViewModel>
     }
 
     // ── Binding handlers ──────────────────────────────────────────────────────
+
+    private void OnIsGoalRandomChanged(bool _, bool isRandom)
+    {
+        goalImage.gameObject.SetActive(!isRandom);
+        goalCountLabel.SetActive(isRandom);
+    }
 
     private void OnGoalSpriteChanged(Sprite _, Sprite newSprite)
         => goalImage.sprite = newSprite;

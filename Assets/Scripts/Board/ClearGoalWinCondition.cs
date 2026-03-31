@@ -26,8 +26,9 @@ public class ClearGoalWinCondition : MonoBehaviour, IWinCondition
         goalTracker.OnGoalCountChanged += count => viewModel.GoalRemaining.Value = count;
         goalTracker.OnGoalCompleted    += () => OnCompleted?.Invoke();
 
-        // Push initial HUD state
-        viewModel.GoalSprite.Value    = visualConfig.GetSprite(goalType);
+        // Push initial HUD state; random goals show no sprite
+        viewModel.IsGoalRandom.Value  = goalType.isRandom;
+        viewModel.GoalSprite.Value    = goalType.isRandom ? null : visualConfig.GetSprite(goalType);
         viewModel.GoalRemaining.Value = levelDetails.goalNumber;
     }
 

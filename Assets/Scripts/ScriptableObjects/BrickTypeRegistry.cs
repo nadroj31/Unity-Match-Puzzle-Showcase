@@ -29,13 +29,13 @@ public class BrickTypeRegistry : ScriptableObject
 
     /// <summary>
     /// Looks up a playable type by its JSON character code.
-    /// Returns <see cref="RandomType"/> if no match is found, so unknown codes
-    /// generate a random colour brick (same behaviour as before).
+    /// Returns a random playable type if no match is found, so unknown codes
+    /// produce a random colour brick rather than the wildcard goal type.
     /// </summary>
     public BrickTypeSO GetByCode(string code)
     {
         foreach (var t in playableTypes)
             if (t.code == code) return t;
-        return randomType;
+        return GetRandom();
     }
 }

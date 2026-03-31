@@ -14,4 +14,7 @@ public class GamePlayViewModel : ViewModelBase
 
     /// <summary>Set to <c>true</c> once the goal is completed.</summary>
     public BindableProperty<bool>   IsVictory     = new BindableProperty<bool>(false);
+
+    /// <summary><c>true</c> when the goal accepts any colour (no specific type required).</summary>
+    public BindableProperty<bool>   IsGoalRandom  = new BindableProperty<bool>(false);
 }
