@@ -599,6 +599,7 @@ MonoBehaviour:
   bricksParent: {fileID: 2019421834}
   gamePlayView: {fileID: 1870853967}
   minMatchCount: 2
+  matchStrategyAsset: {fileID: 11400000, guid: 93a852eafa32cc74daf15a384051011c, type: 2}
   winConditionBehaviour: {fileID: 462278805}
 --- !u!114 &462278804
 MonoBehaviour:
