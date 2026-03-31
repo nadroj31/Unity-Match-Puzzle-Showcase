@@ -37,6 +37,8 @@ public class GamePlayView : ViewBase<GamePlayViewModel>
 
         // Ensure a safe initial state regardless of ViewModel values
         victoryUI.SetActive(false);
+        goalImage.gameObject.SetActive(true);
+        goalCountLabel.SetActive(false);
     }
 
     // ── Binding handlers ──────────────────────────────────────────────────────
