@@ -38,12 +38,15 @@ public class BrickShow : MonoBehaviour, IPointerClickHandler
 
     /// <summary>
     /// Snaps to <paramref name="originY"/> then tweens down to <paramref name="targetY"/> (local space).
+    /// Timing and easing are taken from <paramref name="config"/>.
     /// Returns <c>this</c> for optional chaining.
     /// </summary>
-    public BrickShow TweenMove(float originY, float targetY)
+    public BrickShow TweenMove(float originY, float targetY, BoardAnimationConfig config)
     {
         transform.localPosition = new Vector3(transform.localPosition.x, originY);
-        transform.DOLocalMoveY(targetY, 0.3f).SetEase(Ease.InOutQuad).SetDelay(0.01f);
+        transform.DOLocalMoveY(targetY, config.dropDuration)
+                 .SetEase(config.dropEase)
+                 .SetDelay(config.dropDelay);
         return this;
     }
 }

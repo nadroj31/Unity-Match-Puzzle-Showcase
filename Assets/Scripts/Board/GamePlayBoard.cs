@@ -13,10 +13,11 @@ public class GamePlayBoard : MonoBehaviour
 
     [Header("Data / Config")]
     [Tooltip("ScriptableObject that implements ILevelLoader (e.g. LevelRepository).")]
-    [SerializeField] private ScriptableObject  levelLoaderAsset;
-    [SerializeField] private GameSession       gameSession;
-    [SerializeField] private BrickVisualConfig visualConfig;
-    [SerializeField] private BrickTypeRegistry brickTypeRegistry;
+    [SerializeField] private ScriptableObject    levelLoaderAsset;
+    [SerializeField] private GameSession         gameSession;
+    [SerializeField] private BrickVisualConfig   visualConfig;
+    [SerializeField] private BrickTypeRegistry   brickTypeRegistry;
+    [SerializeField] private BoardAnimationConfig animationConfig;
 
     [Header("Scene Components")]
     [SerializeField] private BrickFactory   brickFactory;
@@ -30,12 +31,6 @@ public class GamePlayBoard : MonoBehaviour
     [SerializeField] private ScriptableObject matchStrategyAsset;
     [Tooltip("MonoBehaviour that implements IWinCondition (e.g. ClearGoalWinCondition). Must be on a GameObject in this scene.")]
     [SerializeField] private MonoBehaviour winConditionBehaviour;
-
-    // ── Constants ─────────────────────────────────────────────────────────────
-
-    private const float BackgroundPadding  = 0.3f;
-    private const float DropHeightOffset   = 2.3f;
-    private const float ProcessLockSeconds = 0.4f;
 
     // ── Runtime state ─────────────────────────────────────────────────────────
 
@@ -95,8 +90,8 @@ public class GamePlayBoard : MonoBehaviour
         visualConfig.Initialize();
 
         boardBackground.size = new Vector2(
-            levelDetails.gridWidth  + BackgroundPadding,
-            levelDetails.gridHeight + BackgroundPadding);
+            levelDetails.gridWidth  + animationConfig.backgroundPadding,
+            levelDetails.gridHeight + animationConfig.backgroundPadding);
 
         bricks     = new Brick[levelDetails.gridWidth, levelDetails.gridHeight];
         brickShows = new BrickShow[levelDetails.gridWidth, levelDetails.gridHeight];
@@ -156,7 +151,7 @@ public class GamePlayBoard : MonoBehaviour
         BoardLogic.ApplyGravity(matches, bricks, brickTypeRegistry, OnBrickMoved);
         winCondition.OnMatchMade(matchType, matches.Count);
 
-        StartCoroutine(UnlockAfterDelay(ProcessLockSeconds));
+        StartCoroutine(UnlockAfterDelay(animationConfig.processLockSeconds));
     }
 
     /// <summary>
@@ -171,8 +166,9 @@ public class GamePlayBoard : MonoBehaviour
         show.Show();
         show.SetSprite(visualConfig.GetSprite(from?.BrickType ?? to.BrickType));
         show.TweenMove(
-            originY: from?.Position.y ?? levelDetails.gridHeight / 2f + DropHeightOffset,
-            targetY: to.Position.y);
+            originY: from?.Position.y ?? levelDetails.gridHeight / 2f + animationConfig.dropHeightOffset,
+            targetY: to.Position.y,
+            config:  animationConfig);
     }
 
     private IEnumerator UnlockAfterDelay(float seconds)
