@@ -20,7 +20,7 @@ public class ClearGoalWinCondition : MonoBehaviour, IWinCondition
         BrickVisualConfig visualConfig,
         GamePlayViewModel viewModel)
     {
-        BrickTypeSO goalType = registry.GetByCode(levelDetails.goal);
+        BrickTypeSO goalType = registry.GetGoalByCode(levelDetails.goal);
         goalTracker = new GoalTracker(goalType, levelDetails.goalNumber);
 
         goalTracker.OnGoalCountChanged += count => viewModel.GoalRemaining.Value = count;

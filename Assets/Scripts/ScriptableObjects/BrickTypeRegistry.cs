@@ -28,14 +28,25 @@ public class BrickTypeRegistry : ScriptableObject
         => playableTypes[Random.Range(0, playableTypes.Length)];
 
     /// <summary>
-    /// Looks up a playable type by its JSON character code.
-    /// Returns a random playable type if no match is found, so unknown codes
-    /// produce a random colour brick rather than the wildcard goal type.
+    /// Looks up a playable type by its JSON character code for use in grid cells.
+    /// Returns a random playable type if no match is found.
     /// </summary>
     public BrickTypeSO GetByCode(string code)
     {
         foreach (var t in playableTypes)
             if (t.code == code) return t;
         return GetRandom();
+    }
+
+    /// <summary>
+    /// Looks up a type by its JSON character code for use in goal definitions.
+    /// Returns <see cref="RandomType"/> if no match is found, treating unknown
+    /// codes as a wildcard goal (any colour counts).
+    /// </summary>
+    public BrickTypeSO GetGoalByCode(string code)
+    {
+        foreach (var t in playableTypes)
+            if (t.code == code) return t;
+        return randomType;
     }
 }
