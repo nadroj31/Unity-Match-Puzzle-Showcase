@@ -8,8 +8,11 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public class ScenesManager : MonoBehaviour, ISceneNavigator
 {
-    private const string MainSceneName     = "MainScene";
-    private const string GamePlaySceneName = "GamePlayScene";
+    [Tooltip("Exact name of the main-menu scene as it appears in Build Settings.")]
+    [SerializeField] private string mainSceneName     = "MainScene";
+
+    [Tooltip("Exact name of the gameplay scene as it appears in Build Settings.")]
+    [SerializeField] private string gamePlaySceneName = "GamePlayScene";
 
     [SerializeField] private GameObject loadingUI;
 
@@ -41,8 +44,11 @@ public class ScenesManager : MonoBehaviour, ISceneNavigator
 
     // ── ISceneNavigator ───────────────────────────────────────────────────────
 
-    public void LoadMainMenu()      => SceneManager.LoadScene(MainSceneName);
-    public void LoadGamePlayScene() => StartCoroutine(LoadAsyncScene(GamePlaySceneName));
+    /// <inheritdoc/>
+    public void LoadMainMenu()      => SceneManager.LoadScene(mainSceneName);
+
+    /// <inheritdoc/>
+    public void LoadGamePlayScene() => StartCoroutine(LoadAsyncScene(gamePlaySceneName));
 
     // ── Internals ─────────────────────────────────────────────────────────────
 
