@@ -4,7 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// Orchestrates the gameplay scene: owns board data, wires game-logic sub-systems
-/// (<see cref="BoardLogic"/>, <see cref="IWinCondition"/>, <see cref="BrickFactory"/>),
+/// (<see cref="BoardLogic"/>, <see cref="IMatchStrategy"/>, <see cref="IWinCondition"/>, <see cref="BrickFactory"/>),
 /// and pushes observable state into <see cref="GamePlayViewModel"/> for the View layer.
 /// </summary>
 public class GamePlayBoard : MonoBehaviour
@@ -26,6 +26,8 @@ public class GamePlayBoard : MonoBehaviour
 
     [Header("Rules")]
     [SerializeField] private int           minMatchCount = 2;
+    [Tooltip("ScriptableObject that implements IMatchStrategy (e.g. ConnectedMatchStrategy).")]
+    [SerializeField] private ScriptableObject matchStrategyAsset;
     [Tooltip("MonoBehaviour that implements IWinCondition (e.g. ClearGoalWinCondition). Must be on a GameObject in this scene.")]
     [SerializeField] private MonoBehaviour winConditionBehaviour;
 
@@ -38,6 +40,7 @@ public class GamePlayBoard : MonoBehaviour
     // ── Runtime state ─────────────────────────────────────────────────────────
 
     private ILevelLoader      levelLoader;
+    private IMatchStrategy    matchStrategy;
     private LevelDetails      levelDetails;
     private Brick[,]          bricks;
     private BrickShow[,]      brickShows;
@@ -53,6 +56,13 @@ public class GamePlayBoard : MonoBehaviour
         if (levelLoader == null)
         {
             Debug.LogError("[GamePlayBoard] levelLoaderAsset does not implement ILevelLoader.", this);
+            return;
+        }
+
+        matchStrategy = matchStrategyAsset as IMatchStrategy;
+        if (matchStrategy == null)
+        {
+            Debug.LogError("[GamePlayBoard] matchStrategyAsset does not implement IMatchStrategy.", this);
             return;
         }
 
@@ -127,7 +137,7 @@ public class GamePlayBoard : MonoBehaviour
     {
         if (isProcessing) return;
 
-        List<Brick> matches = BoardLogic.FindMatchBricks(clicked, bricks);
+        List<Brick> matches = matchStrategy.FindMatches(clicked, bricks);
         if (matches.Count < minMatchCount) return;
 
         isProcessing = true;

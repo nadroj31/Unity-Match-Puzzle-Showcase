@@ -1,55 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
-/// <summary>Stateless game-logic layer. Pure algorithms — no MonoBehaviour, no scene coupling.</summary>
+/// <summary>Stateless gravity layer. Pure algorithm — no MonoBehaviour, no scene coupling.</summary>
 public static class BoardLogic
 {
-    private static readonly int[] DirX = {  1, -1,  0,  0 };
-    private static readonly int[] DirY = {  0,  0,  1, -1 };
-
-    // ── Flood-fill ────────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Returns all bricks orthogonally connected to <paramref name="startBrick"/>
-    /// that share the same <see cref="BrickTypeSO"/>. Uses iterative BFS.
-    /// </summary>
-    public static List<Brick> FindMatchBricks(Brick startBrick, Brick[,] board)
-    {
-        int width  = board.GetLength(0);
-        int height = board.GetLength(1);
-
-        var result  = new List<Brick>();
-        var visited = new HashSet<Brick> { startBrick };
-        var queue   = new Queue<Brick>();
-        queue.Enqueue(startBrick);
-
-        while (queue.Count > 0)
-        {
-            Brick current = queue.Dequeue();
-            result.Add(current);
-
-            for (int d = 0; d < 4; d++)
-            {
-                int nx = current.X + DirX[d];
-                int ny = current.Y + DirY[d];
-
-                if (nx < 0 || nx >= width || ny < 0 || ny >= height)
-                    continue;
-
-                Brick neighbor = board[nx, ny];
-                if (visited.Contains(neighbor) || neighbor.BrickType != startBrick.BrickType)
-                    continue;
-
-                visited.Add(neighbor);
-                queue.Enqueue(neighbor);
-            }
-        }
-
-        return result;
-    }
-
     // ── Gravity ───────────────────────────────────────────────────────────────
 
     /// <summary>
