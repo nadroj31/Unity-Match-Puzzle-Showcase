@@ -44,6 +44,7 @@ public class GamePlayBoard : MonoBehaviour
     private GamePlayViewModel viewModel;
     private bool              isProcessing;
     private int               movesRemaining;
+    private int               pendingAnimations;
 
     // ── Unity lifecycle ───────────────────────────────────────────────────────
 
@@ -175,11 +176,6 @@ public class GamePlayBoard : MonoBehaviour
         }
 
         ProcessMatches(matches);
-
-        // Win condition is evaluated synchronously inside ProcessMatches via GoalTracker.
-        // Only trigger fail if moves are exhausted and victory has not already been set.
-        if (levelDetails.moveLimit > 0 && movesRemaining <= 0 && !viewModel.IsVictory.Value)
-            OnFailConditionMet();
     }
 
     // ── Match processing ──────────────────────────────────────────────────────
@@ -194,7 +190,9 @@ public class GamePlayBoard : MonoBehaviour
         BoardLogic.ApplyGravity(matches, bricks, brickTypeRegistry, OnBrickMoved);
         winCondition.OnMatchMade(matchType, matches.Count);
 
-        StartCoroutine(UnlockAfterDelay(animationConfig.processLockSeconds));
+        // If no animations were queued (e.g. empty board edge case), settle immediately.
+        if (pendingAnimations <= 0)
+            StartCoroutine(CascadeAfterSettle());
     }
 
     /// <summary>
@@ -208,16 +206,83 @@ public class GamePlayBoard : MonoBehaviour
 
         show.Show();
         show.SetSprite(visualConfig.GetSprite(from?.BrickType ?? to.BrickType));
+
+        pendingAnimations++;
         show.TweenMove(
             originY: from?.Position.y ?? levelDetails.gridHeight / 2f + animationConfig.dropHeightOffset,
             targetY: to.Position.y,
-            config:  animationConfig);
+            config:  animationConfig,
+            onComplete: OnSingleAnimationComplete);
     }
 
-    private IEnumerator UnlockAfterDelay(float seconds)
+    private void OnSingleAnimationComplete()
     {
-        yield return new WaitForSeconds(seconds);
-        isProcessing = false;
+        pendingAnimations--;
+        if (pendingAnimations <= 0)
+            StartCoroutine(CascadeAfterSettle());
+    }
+
+    // ── Cascade ───────────────────────────────────────────────────────────────
+
+    private IEnumerator CascadeAfterSettle()
+    {
+        yield return new WaitForSeconds(animationConfig.cascadeSettleDelay);
+        CheckCascades();
+    }
+
+    /// <summary>
+    /// Scans the board for any groups that qualify as matches. If found,
+    /// removes them all and re-applies gravity (triggering further cascades via
+    /// animation callbacks). If none found, the board is stable — unlock input
+    /// and evaluate fail condition.
+    /// </summary>
+    private void CheckCascades()
+    {
+        // Stop if an outcome has already been decided.
+        if (viewModel.IsVictory.Value || viewModel.IsFailed.Value) return;
+
+        List<List<Brick>> allGroups = FindAllCascadeGroups();
+
+        if (allGroups.Count > 0)
+        {
+            foreach (var group in allGroups)
+                ProcessMatches(group);
+        }
+        else
+        {
+            // Board is stable — check fail condition then release input lock.
+            if (levelDetails.moveLimit > 0 && movesRemaining <= 0 && !viewModel.IsVictory.Value)
+                OnFailConditionMet();
+            else
+                isProcessing = false;
+        }
+    }
+
+    /// <summary>
+    /// Finds every connected group on the current board that meets
+    /// <see cref="minMatchCount"/>. Each cell is visited at most once.
+    /// </summary>
+    private List<List<Brick>> FindAllCascadeGroups()
+    {
+        var result  = new List<List<Brick>>();
+        var visited = new HashSet<Brick>();
+
+        for (int x = 0; x < levelDetails.gridWidth; x++)
+        {
+            for (int y = 0; y < levelDetails.gridHeight; y++)
+            {
+                Brick brick = bricks[x, y];
+                if (brick == null || visited.Contains(brick)) continue;
+
+                List<Brick> group = matchStrategy.FindMatches(brick, bricks);
+                foreach (var b in group) visited.Add(b);
+
+                if (group.Count >= minMatchCount)
+                    result.Add(group);
+            }
+        }
+
+        return result;
     }
 
     // ── Outcome ───────────────────────────────────────────────────────────────

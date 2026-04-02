@@ -26,6 +26,6 @@ public class BoardAnimationConfig : ScriptableObject
     public float backgroundPadding = 0.3f;
 
     [Header("Input")]
-    [Tooltip("Seconds input is locked after a match is processed (allows animations to finish).")]
-    public float processLockSeconds = 0.4f;
+    [Tooltip("Seconds to wait after all drop animations settle before checking for cascade matches.")]
+    public float cascadeSettleDelay = 0.05f;
 }
