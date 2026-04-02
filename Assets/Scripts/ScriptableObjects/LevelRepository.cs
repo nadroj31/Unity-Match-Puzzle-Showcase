@@ -26,8 +26,8 @@ public class LevelRepository : ScriptableObject, ILevelLoader
                 levelNumber = info.levelNumber,
                 gridWidth   = info.gridWidth,
                 gridHeight  = info.gridHeight,
-                goal        = info.goal,
-                goalNumber  = info.goalNumber,
+                moveLimit   = info.moveLimit,
+                goals       = ParseGoals(info.goals),
                 gridData    = new BrickTypeSO[info.gridWidth, info.gridHeight]
             };
 
@@ -57,4 +57,18 @@ public class LevelRepository : ScriptableObject, ILevelLoader
 
     /// <summary>Returns all cached level numbers.</summary>
     public List<int> GetAllLevelKeys() => new List<int>(levels.Keys);
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private GoalData[] ParseGoals(GoalInfo[] goalInfos)
+    {
+        if (goalInfos == null || goalInfos.Length == 0)
+            return new GoalData[0];
+
+        var result = new GoalData[goalInfos.Length];
+        for (int i = 0; i < goalInfos.Length; i++)
+            result[i] = new GoalData(brickTypeRegistry.GetGoalByCode(goalInfos[i].brickCode), goalInfos[i].count);
+
+        return result;
+    }
 }

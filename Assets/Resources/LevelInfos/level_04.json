@@ -1,8 +1,11 @@
 {
-       "levelNumber": 4,
-       "gridWidth": 8,
-       "gridHeight": 8,
-       "goal": "random",
-       "goalNumber": 100,
-       "grid": ["y", "r", "r", "g", "g", "b", "b", "y", "r", "r", "g", "g", "b", "b", "y", "y", "r", "g", "g", "b", "b", "y", "y", "b", "g", "g", "b", "b", "y", "y", "b", "b", "g", "b", "b", "y", "y", "b", "b", "g", "b", "b", "y", "y", "b", "b", "g", "g", "b", "y", "y", "b", "b", "g", "g", "r","y", "y", "b", "b", "g", "g", "r", "y"]
+    "levelNumber": 4,
+    "gridWidth": 8,
+    "gridHeight": 8,
+    "moveLimit": 50,
+    "goals": [
+        { "brickCode": "random", "count": 40 },
+        { "brickCode": "y", "count": 10 }
+    ],
+    "grid": ["y", "r", "r", "g", "g", "b", "b", "y", "r", "r", "g", "g", "b", "b", "y", "y", "r", "g", "g", "b", "b", "y", "y", "b", "g", "g", "b", "b", "y", "y", "b", "b", "g", "b", "b", "y", "y", "b", "b", "g", "b", "b", "y", "y", "b", "b", "g", "g", "b", "y", "y", "b", "b", "g", "g", "r", "y", "y", "b", "b", "g", "g", "r", "y"]
 }

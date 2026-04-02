@@ -43,6 +43,7 @@ public class GamePlayBoard : MonoBehaviour
     private IWinCondition     winCondition;
     private GamePlayViewModel viewModel;
     private bool              isProcessing;
+    private int               movesRemaining;
 
     // ── Unity lifecycle ───────────────────────────────────────────────────────
 
@@ -98,8 +99,18 @@ public class GamePlayBoard : MonoBehaviour
         brickShows = new BrickShow[levelDetails.gridWidth, levelDetails.gridHeight];
 
         AdjustCamera();
+        SetupMoveLimit();
         PopulateBricks();
         SetupWinCondition();
+    }
+
+    private void SetupMoveLimit()
+    {
+        bool hasLimit = levelDetails.moveLimit > 0;
+        movesRemaining = levelDetails.moveLimit;
+
+        viewModel.HasMoveLimit.Value   = hasLimit;
+        viewModel.MovesRemaining.Value = movesRemaining;
     }
 
     /// <summary>
@@ -156,7 +167,19 @@ public class GamePlayBoard : MonoBehaviour
         if (matches.Count < minMatchCount) return;
 
         isProcessing = true;
+
+        if (levelDetails.moveLimit > 0)
+        {
+            movesRemaining--;
+            viewModel.MovesRemaining.Value = movesRemaining;
+        }
+
         ProcessMatches(matches);
+
+        // Win condition is evaluated synchronously inside ProcessMatches via GoalTracker.
+        // Only trigger fail if moves are exhausted and victory has not already been set.
+        if (levelDetails.moveLimit > 0 && movesRemaining <= 0 && !viewModel.IsVictory.Value)
+            OnFailConditionMet();
     }
 
     // ── Match processing ──────────────────────────────────────────────────────
@@ -197,11 +220,17 @@ public class GamePlayBoard : MonoBehaviour
         isProcessing = false;
     }
 
-    // ── Victory ───────────────────────────────────────────────────────────────
+    // ── Outcome ───────────────────────────────────────────────────────────────
 
     private void OnWinConditionCompleted()
     {
-        isProcessing = true;              // block further input
-        viewModel.IsVictory.Value = true; // View handles victoryUI via binding
+        isProcessing = true;
+        viewModel.IsVictory.Value = true;
+    }
+
+    private void OnFailConditionMet()
+    {
+        isProcessing = true;
+        viewModel.IsFailed.Value = true;
     }
 }

@@ -1,8 +1,11 @@
 {
-       "levelNumber": 2,
-       "gridWidth": 6,
-       "gridHeight": 6,
-       "goal": "y",
-       "goalNumber": 30,
-       "grid": ["y", "y", "y", "y", "y", "y", "y", "y", "y", "y", "y", "y", "b", "b", "b", "b", "b", "b", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r"]
+    "levelNumber": 2,
+    "gridWidth": 6,
+    "gridHeight": 6,
+    "moveLimit": 25,
+    "goals": [
+        { "brickCode": "y", "count": 12 },
+        { "brickCode": "b", "count": 6 }
+    ],
+    "grid": ["y", "y", "y", "y", "y", "y", "y", "y", "y", "y", "y", "y", "b", "b", "b", "b", "b", "b", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r", "r"]
 }
