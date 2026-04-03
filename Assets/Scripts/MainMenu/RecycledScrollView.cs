@@ -72,9 +72,20 @@ public class RecycledScrollView : MonoBehaviour
     private void EnsurePoolSize(int required)
     {
         // Resolve navigator lazily so script execution order does not matter.
-        if (sceneNavigator == null)
+        // We must use Unity's null check (not C# ==) on the MonoBehaviour field because
+        // a destroyed UnityEngine.Object still has a live C# wrapper — plain == null would
+        // return false even after Destroy(), causing a MissingReferenceException on use.
+        //
+        // Scenario: MainScene reloads after returning from GamePlayScene. A new ScenesManager
+        // is instantiated but immediately Destroy()ed by the DontDestroyOnLoad singleton's
+        // Awake(). The Inspector-serialized reference now points to that destroyed object.
+        // Falling back to ScenesManager.Instance retrieves the persistent singleton instead.
+        if (sceneNavigator == null || (Object)sceneNavigatorBehaviour == null)
         {
-            sceneNavigator = sceneNavigatorBehaviour as ISceneNavigator;
+            sceneNavigator = sceneNavigatorBehaviour != null
+                ? sceneNavigatorBehaviour as ISceneNavigator
+                : ScenesManager.Instance;
+
             if (sceneNavigator == null)
                 Debug.LogError("[RecycledScrollView] sceneNavigatorBehaviour does not implement ISceneNavigator.", this);
         }
