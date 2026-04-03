@@ -156,10 +156,6 @@ public class LevelEditorWindow : EditorWindow
                 ResizeGrid(pendingW, pendingH);
         }
 
-        if (pendingW == MAX_W || pendingH == MAX_H)
-            EditorGUILayout.HelpBox(
-                $"Maximum grid size is {MAX_W}×{MAX_H}. Larger grids make bricks too small to tap on mobile.",
-                MessageType.Warning);
     }
 
     // ── Section: Goals ────────────────────────────────────────────────────────
