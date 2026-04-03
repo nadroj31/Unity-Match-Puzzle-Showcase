@@ -28,14 +28,31 @@ public class BrickShow : MonoBehaviour, IPointerClickHandler
     // ── Visibility ────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Hides this brick by scaling to zero.
-    /// Uses scale instead of <c>SetActive(false)</c> so DOTween can still
-    /// animate the transform while it is logically hidden.
+    /// Plays a pop-then-shrink destruction animation using the timings in <paramref name="config"/>.
+    /// Uses scale instead of <c>SetActive(false)</c> so the transform stays alive for DOTween.
+    /// Any in-progress tween on this transform is cancelled first.
     /// </summary>
-    public void Hide() => transform.localScale = Vector3.zero;
+    public void Hide(BoardAnimationConfig config)
+    {
+        transform.DOKill();
 
-    /// <summary>Restores the brick to full size after a <see cref="Hide"/> call.</summary>
-    public void Show() => transform.localScale = Vector3.one;
+        float popDuration    = config.destroyDuration * 0.35f;
+        float shrinkDuration = config.destroyDuration * 0.65f;
+
+        DOTween.Sequence()
+               .Append(transform.DOScale(config.destroyPopScale, popDuration).SetEase(Ease.OutQuad))
+               .Append(transform.DOScale(0f,                     shrinkDuration).SetEase(Ease.InBack));
+    }
+
+    /// <summary>
+    /// Immediately restores the brick to full size.
+    /// Cancels any in-progress tween (e.g. a destruction animation interrupted by gravity).
+    /// </summary>
+    public void Show()
+    {
+        transform.DOKill();
+        transform.localScale = Vector3.one;
+    }
 
     // ── Input ─────────────────────────────────────────────────────────────────
 

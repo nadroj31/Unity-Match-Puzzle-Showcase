@@ -21,6 +21,13 @@ public class BoardAnimationConfig : ScriptableObject
     [Tooltip("How far above the top of the grid new bricks spawn before dropping in.")]
     public float dropHeightOffset = 2.3f;
 
+    [Header("Destroy Animation")]
+    [Tooltip("Total duration of the pop-then-shrink destruction animation in seconds.")]
+    public float destroyDuration = 0.2f;
+
+    [Tooltip("Peak scale factor during the brief pop before the brick shrinks to zero. Values around 1.1–1.3 feel snappy.")]
+    public float destroyPopScale = 1.2f;
+
     [Header("Board")]
     [Tooltip("Extra padding added to each side of the board background sprite.")]
     public float backgroundPadding = 0.3f;

@@ -189,7 +189,7 @@ public class GamePlayBoard : MonoBehaviour
         BrickTypeSO matchType = matches[0].BrickType;
 
         foreach (var brick in matches)
-            brickShows[brick.X, brick.Y].Hide();
+            brickShows[brick.X, brick.Y].Hide(animationConfig);
 
         BoardLogic.ApplyGravity(matches, bricks, brickTypeRegistry, OnBrickMoved);
         winCondition.OnMatchMade(matchType, matches.Count);
