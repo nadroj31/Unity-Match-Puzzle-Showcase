@@ -13,7 +13,6 @@ public class BrickShow : MonoBehaviour, IPointerClickHandler
 
     private Brick         brick;
     private Action<Brick> onClick;
-    private Sequence      destroySequence;
 
     // ── Setup ─────────────────────────────────────────────────────────────────
 
@@ -29,35 +28,39 @@ public class BrickShow : MonoBehaviour, IPointerClickHandler
     // ── Visibility ────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Plays a pop-then-shrink destruction animation using the timings in <paramref name="config"/>.
-    /// Uses scale instead of <c>SetActive(false)</c> so the transform stays alive for DOTween.
-    /// The sequence reference is stored so <see cref="Show"/> can cancel it without
-    /// accidentally killing the independent drop tween on the same transform.
+    /// Spawns a short-lived visual ghost at this brick's position and plays the
+    /// pop-then-shrink animation on it, then destroys the ghost.
+    /// The original BrickShow is immediately set to scale zero so the gravity
+    /// system can recycle it for the next incoming brick without interrupting
+    /// the destruction animation.
     /// </summary>
     public void Hide(BoardAnimationConfig config)
     {
-        destroySequence?.Kill();
+        // Create a lightweight ghost that carries the visual while this BrickShow is recycled.
+        var ghost = new GameObject("BrickGhost");
+        ghost.transform.SetParent(transform.parent);
+        ghost.transform.localPosition = transform.localPosition;
+        ghost.transform.localScale    = Vector3.one;
+
+        var ghostRenderer             = ghost.AddComponent<SpriteRenderer>();
+        ghostRenderer.sprite          = spriteRenderer.sprite;
+        ghostRenderer.sortingLayerID  = spriteRenderer.sortingLayerID;
+        ghostRenderer.sortingOrder    = spriteRenderer.sortingOrder;
 
         float popDuration    = config.destroyDuration * 0.35f;
         float shrinkDuration = config.destroyDuration * 0.65f;
 
-        destroySequence = DOTween.Sequence()
-               .Append(transform.DOScale(config.destroyPopScale, popDuration).SetEase(Ease.OutQuad))
-               .Append(transform.DOScale(0f,                     shrinkDuration).SetEase(Ease.InBack));
+        DOTween.Sequence()
+               .Append(ghost.transform.DOScale(config.destroyPopScale, popDuration).SetEase(Ease.OutQuad))
+               .Append(ghost.transform.DOScale(0f, shrinkDuration).SetEase(Ease.InBack))
+               .OnComplete(() => Destroy(ghost));
+
+        // Immediately hide this BrickShow — gravity will reuse it for the incoming brick.
+        transform.localScale = Vector3.zero;
     }
 
-    /// <summary>
-    /// Restores the brick to full size, cancelling only the destruction sequence.
-    /// The drop tween (position) is intentionally left untouched.
-    /// Called when this BrickShow is recycled for an incoming brick before the
-    /// destruction animation finishes.
-    /// </summary>
-    public void Show()
-    {
-        destroySequence?.Kill();
-        destroySequence = null;
-        transform.localScale = Vector3.one;
-    }
+    /// <summary>Restores the brick to full size when it is recycled for an incoming brick.</summary>
+    public void Show() => transform.localScale = Vector3.one;
 
     // ── Input ─────────────────────────────────────────────────────────────────
 
