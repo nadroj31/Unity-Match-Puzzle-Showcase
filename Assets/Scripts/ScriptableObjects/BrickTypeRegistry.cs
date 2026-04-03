@@ -23,6 +23,9 @@ public class BrickTypeRegistry : ScriptableObject
     /// <summary>The wildcard goal type — matches any colour.</summary>
     public BrickTypeSO RandomType => randomType;
 
+    /// <summary>Returns all registered playable types. Intended for editor tooling.</summary>
+    public BrickTypeSO[] GetAllPlayableTypes() => playableTypes;
+
     /// <summary>Returns a uniformly random playable brick type. Requires at least one entry in <c>playableTypes</c>.</summary>
     public BrickTypeSO GetRandom()
     {
