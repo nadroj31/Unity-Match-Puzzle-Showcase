@@ -47,13 +47,11 @@ public class BrickShow : MonoBehaviour, IPointerClickHandler
         ghostRenderer.sortingLayerID  = spriteRenderer.sortingLayerID;
         ghostRenderer.sortingOrder    = spriteRenderer.sortingOrder + 1; // render above all live bricks
 
-        float popDuration    = config.destroyDuration * 0.35f;
-        float shrinkDuration = config.destroyDuration * 0.65f;
-
-        DOTween.Sequence()
-               .Append(ghost.transform.DOScale(config.destroyPopScale, popDuration).SetEase(Ease.OutQuad))
-               .Append(ghost.transform.DOScale(0f, shrinkDuration).SetEase(Ease.InBack))
-               .OnComplete(() => Destroy(ghost));
+        // InBack easing gives a punchy snap-to-zero feel without expanding
+        // outside the brick's cell boundaries (important in a dense grid).
+        ghost.transform.DOScale(0f, config.destroyDuration)
+             .SetEase(Ease.InBack)
+             .OnComplete(() => Destroy(ghost));
 
         // Immediately hide this BrickShow — gravity will reuse it for the incoming brick.
         transform.localScale = Vector3.zero;
