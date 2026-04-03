@@ -44,6 +44,14 @@ public class LevelEditorWindow : EditorWindow
     private const float  PAD       = 2f;
     private const string RAND_CODE = "?";
 
+    // Grid size constraints — keeps bricks large enough to tap on a 1080×1920 screen.
+    // Width  ≤ 10 → each brick ≥ ~100 px wide.
+    // Height ≤ 12 → board stays within screen height without scrolling.
+    private const int MIN_W = 3;
+    private const int MAX_W = 10;
+    private const int MIN_H = 3;
+    private const int MAX_H = 12;
+
     private static readonly Dictionary<string, Color> CellColors = new Dictionary<string, Color>
     {
         { "b", new Color(0.24f, 0.49f, 0.95f) },
@@ -139,14 +147,19 @@ public class LevelEditorWindow : EditorWindow
         EditorGUILayout.Space(6);
         EditorGUILayout.LabelField("Grid Size", EditorStyles.boldLabel);
 
-        pendingW = Mathf.Max(1, EditorGUILayout.IntField("Width",  pendingW));
-        pendingH = Mathf.Max(1, EditorGUILayout.IntField("Height", pendingH));
+        pendingW = Mathf.Clamp(EditorGUILayout.IntField($"Width   ({MIN_W}–{MAX_W})",  pendingW), MIN_W, MAX_W);
+        pendingH = Mathf.Clamp(EditorGUILayout.IntField($"Height  ({MIN_H}–{MAX_H})", pendingH), MIN_H, MAX_H);
 
         using (new EditorGUI.DisabledScope(pendingW == gridWidth && pendingH == gridHeight))
         {
             if (GUILayout.Button("Apply Grid Size"))
                 ResizeGrid(pendingW, pendingH);
         }
+
+        if (pendingW == MAX_W || pendingH == MAX_H)
+            EditorGUILayout.HelpBox(
+                $"Maximum grid size is {MAX_W}×{MAX_H}. Larger grids make bricks too small to tap on mobile.",
+                MessageType.Warning);
     }
 
     // ── Section: Goals ────────────────────────────────────────────────────────
@@ -326,6 +339,9 @@ public class LevelEditorWindow : EditorWindow
 
     private void ResizeGrid(int newW, int newH)
     {
+        newW = Mathf.Clamp(newW, MIN_W, MAX_W);
+        newH = Mathf.Clamp(newH, MIN_H, MAX_H);
+
         var newFlat = new List<string>(newW * newH);
         for (int row = 0; row < newH; row++)
             for (int col = 0; col < newW; col++)
@@ -424,8 +440,8 @@ public class LevelEditorWindow : EditorWindow
 
         var info = JsonUtility.FromJson<LevelInfo>(File.ReadAllText(path));
 
-        gridWidth  = info.gridWidth;
-        gridHeight = info.gridHeight;
+        gridWidth  = Mathf.Clamp(info.gridWidth,  MIN_W, MAX_W);
+        gridHeight = Mathf.Clamp(info.gridHeight, MIN_H, MAX_H);
         moveLimit  = info.moveLimit;
         pendingW   = gridWidth;
         pendingH   = gridHeight;
