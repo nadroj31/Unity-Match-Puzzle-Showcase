@@ -39,16 +39,19 @@ public class BrickShow : MonoBehaviour, IPointerClickHandler
         // Create a lightweight ghost that carries the visual while this BrickShow is recycled.
         var ghost = new GameObject("BrickGhost");
         ghost.transform.SetParent(transform.parent);
-        // Mirror the SpriteRenderer's world-space transform, not the BrickShow root.
-        // If the SpriteRenderer lives on a child object with its own scale, using the
-        // root's localPosition/localScale would create a ghost that is larger than one cell.
-        ghost.transform.position   = spriteRenderer.transform.position;
-        ghost.transform.localScale = spriteRenderer.transform.lossyScale; // world scale → local (parent assumed uniform)
+        ghost.transform.localPosition = transform.localPosition;
+        ghost.transform.localScale    = Vector3.one;
 
         var ghostRenderer             = ghost.AddComponent<SpriteRenderer>();
         ghostRenderer.sprite          = spriteRenderer.sprite;
         ghostRenderer.sortingLayerID  = spriteRenderer.sortingLayerID;
         ghostRenderer.sortingOrder    = spriteRenderer.sortingOrder + 1; // render above all live bricks
+        // The source SpriteRenderer uses Sliced draw mode with a fixed size (e.g. 1×1 units).
+        // Without copying drawMode + size the ghost falls back to Simple mode and renders
+        // at the sprite's raw texture size, which is much larger than one grid cell.
+        ghostRenderer.drawMode        = spriteRenderer.drawMode;
+        if (spriteRenderer.drawMode != SpriteDrawMode.Simple)
+            ghostRenderer.size        = spriteRenderer.size;
 
         // InBack easing gives a punchy snap-to-zero feel without expanding
         // outside the brick's cell boundaries (important in a dense grid).
