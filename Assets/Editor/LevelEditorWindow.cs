@@ -180,6 +180,11 @@ public class LevelEditorWindow : EditorWindow
     {
         string[] allCodes = GetPlayableCodes();
 
+        // Collect the removal request after the loop so every BeginHorizontal has a
+        // matching EndHorizontal. Breaking out of the loop mid-row leaves the layout
+        // stack unbalanced and causes Unity's "Invalid GUILayout state" error.
+        int removeIdx = -1;
+
         for (int i = 0; i < goals.Count; i++)
         {
             // Build a list of codes available to this slot:
@@ -206,12 +211,15 @@ public class LevelEditorWindow : EditorWindow
             goals[i].count = Mathf.Max(1, EditorGUILayout.IntField(goals[i].count, GUILayout.Width(64)));
             EditorGUILayout.LabelField("bricks", GUILayout.Width(42));
 
-            if (SmallBtn("✕"))
-            {
-                goals.RemoveAt(i);
-                break;
-            }
+            if (SmallBtn("✕")) removeIdx = i;
+
             EditorGUILayout.EndHorizontal();
+        }
+
+        if (removeIdx >= 0)
+        {
+            goals.RemoveAt(removeIdx);
+            Repaint();
         }
 
         // Disable Add if all playable types are already used, or if 3 goals are set
