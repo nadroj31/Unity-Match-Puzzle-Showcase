@@ -13,6 +13,7 @@ public class BrickShow : MonoBehaviour, IPointerClickHandler
 
     private Brick         brick;
     private Action<Brick> onClick;
+    private Sequence      destroySequence;
 
     // ── Setup ─────────────────────────────────────────────────────────────────
 
@@ -30,27 +31,31 @@ public class BrickShow : MonoBehaviour, IPointerClickHandler
     /// <summary>
     /// Plays a pop-then-shrink destruction animation using the timings in <paramref name="config"/>.
     /// Uses scale instead of <c>SetActive(false)</c> so the transform stays alive for DOTween.
-    /// Any in-progress tween on this transform is cancelled first.
+    /// The sequence reference is stored so <see cref="Show"/> can cancel it without
+    /// accidentally killing the independent drop tween on the same transform.
     /// </summary>
     public void Hide(BoardAnimationConfig config)
     {
-        transform.DOKill();
+        destroySequence?.Kill();
 
         float popDuration    = config.destroyDuration * 0.35f;
         float shrinkDuration = config.destroyDuration * 0.65f;
 
-        DOTween.Sequence()
+        destroySequence = DOTween.Sequence()
                .Append(transform.DOScale(config.destroyPopScale, popDuration).SetEase(Ease.OutQuad))
                .Append(transform.DOScale(0f,                     shrinkDuration).SetEase(Ease.InBack));
     }
 
     /// <summary>
-    /// Immediately restores the brick to full size.
-    /// Cancels any in-progress tween (e.g. a destruction animation interrupted by gravity).
+    /// Restores the brick to full size, cancelling only the destruction sequence.
+    /// The drop tween (position) is intentionally left untouched.
+    /// Called when this BrickShow is recycled for an incoming brick before the
+    /// destruction animation finishes.
     /// </summary>
     public void Show()
     {
-        transform.DOKill();
+        destroySequence?.Kill();
+        destroySequence = null;
         transform.localScale = Vector3.one;
     }
 
