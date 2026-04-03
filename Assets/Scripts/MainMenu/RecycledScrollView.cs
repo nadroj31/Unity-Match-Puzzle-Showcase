@@ -15,6 +15,9 @@ public class RecycledScrollView : MonoBehaviour
     [SerializeField] private ScrollRect  scrollRect;
     [SerializeField] private LevelButton buttonPrefab;
 
+    [Tooltip("MonoBehaviour in this scene that implements ISceneNavigator (e.g. ScenesManager).")]
+    [SerializeField] private MonoBehaviour sceneNavigatorBehaviour;
+
     [Tooltip("Height of each level button in pixels.")]
     [SerializeField] private float itemHeight = 100f;
 
@@ -24,9 +27,19 @@ public class RecycledScrollView : MonoBehaviour
     // ── Runtime state ─────────────────────────────────────────────────────────
 
     private readonly List<LevelButton> pool = new List<LevelButton>();
-    private List<int>     data             = new List<int>();
-    private RectTransform content;
-    private int           poolSize;
+    private ISceneNavigator sceneNavigator;
+    private List<int>       data             = new List<int>();
+    private RectTransform   content;
+    private int             poolSize;
+
+    // ── Unity lifecycle ───────────────────────────────────────────────────────
+
+    private void Awake()
+    {
+        sceneNavigator = sceneNavigatorBehaviour as ISceneNavigator;
+        if (sceneNavigator == null)
+            Debug.LogError("[RecycledScrollView] sceneNavigatorBehaviour does not implement ISceneNavigator.", this);
+    }
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -70,6 +83,7 @@ public class RecycledScrollView : MonoBehaviour
         while (pool.Count < required)
         {
             var btn = Instantiate(buttonPrefab, content);
+            btn.SetNavigator(sceneNavigator);
             pool.Add(btn);
         }
 

@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// Win condition: clear all brick goals defined in the level data.
 /// Supports 0–3 simultaneous brick-type goals. Victory fires once every goal reaches zero.
-/// A wildcard goal type (<see cref="BrickTypeSO.isRandom"/>) accepts any colour.
+/// A wildcard goal type (<see cref="BrickTypeSO.IsRandom"/>) accepts any colour.
 /// </summary>
 public class ClearGoalWinCondition : MonoBehaviour, IWinCondition
 {

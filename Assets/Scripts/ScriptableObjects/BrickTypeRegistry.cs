@@ -41,7 +41,7 @@ public class BrickTypeRegistry : ScriptableObject
     public BrickTypeSO GetByCode(string code)
     {
         foreach (var t in playableTypes)
-            if (t.code == code) return t;
+            if (t.Code == code) return t;
         return GetRandom();
     }
 
@@ -53,7 +53,7 @@ public class BrickTypeRegistry : ScriptableObject
     public BrickTypeSO GetGoalByCode(string code)
     {
         foreach (var t in playableTypes)
-            if (t.code == code) return t;
+            if (t.Code == code) return t;
         return randomType;
     }
 }

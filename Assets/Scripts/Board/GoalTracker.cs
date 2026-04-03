@@ -23,11 +23,11 @@ public class GoalTracker
 
     /// <summary>
     /// Registers a completed match. Decrements the counter when the matched type qualifies.
-    /// A goal whose <see cref="BrickTypeSO.isRandom"/> flag is set accepts any colour.
+    /// A goal whose <see cref="BrickTypeSO.IsRandom"/> flag is set accepts any colour.
     /// </summary>
     public void RegisterMatch(BrickTypeSO matchedType, int count)
     {
-        if (!GoalType.isRandom && GoalType != matchedType)
+        if (!GoalType.IsRandom && GoalType != matchedType)
             return;
 
         Remaining = Mathf.Max(Remaining - count, 0);

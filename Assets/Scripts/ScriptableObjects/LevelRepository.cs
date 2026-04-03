@@ -31,6 +31,15 @@ public class LevelRepository : ScriptableObject, ILevelLoader
                 gridData    = new BrickTypeSO[info.gridWidth, info.gridHeight]
             };
 
+            int expectedCells = info.gridWidth * info.gridHeight;
+            if (info.grid == null || info.grid.Length != expectedCells)
+            {
+                Debug.LogError($"[LevelRepository] Level {info.levelNumber}: " +
+                               $"grid has {info.grid?.Length ?? 0} entries but expected {expectedCells} " +
+                               $"({info.gridWidth}×{info.gridHeight}). Skipping level.");
+                continue;
+            }
+
             int gridIndex = 0;
             // JSON rows are stored top-to-bottom; invert to match world-space Y
             for (int row = info.gridHeight - 1; row >= 0; row--)

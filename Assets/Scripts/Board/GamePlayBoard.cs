@@ -51,7 +51,7 @@ public class GamePlayBoard : MonoBehaviour
     private void Awake()
     {
         // Pre-allocate DOTween capacity to avoid runtime auto-expansion warnings.
-        // 500 tweeners comfortably covers a full board re-drop across cascade rounds.
+        // 500 tweeners comfortably covers a full board drop when all columns refill at once.
         DOTween.SetTweensCapacity(500, 50);
 
         levelLoader = levelLoaderAsset as ILevelLoader;
@@ -194,7 +194,7 @@ public class GamePlayBoard : MonoBehaviour
         BoardLogic.ApplyGravity(matches, bricks, brickTypeRegistry, OnBrickMoved);
         winCondition.OnMatchMade(matchType, matches.Count);
 
-        // If no animations were queued (e.g. empty-column edge case), settle immediately.
+        // All gravity animations may already be done (e.g. top-row match with nothing above).
         if (pendingAnimations <= 0)
             OnBoardSettled();
     }

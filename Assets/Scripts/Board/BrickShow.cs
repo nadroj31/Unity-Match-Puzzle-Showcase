@@ -27,7 +27,14 @@ public class BrickShow : MonoBehaviour, IPointerClickHandler
 
     // ── Visibility ────────────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Hides this brick by scaling to zero.
+    /// Uses scale instead of <c>SetActive(false)</c> so DOTween can still
+    /// animate the transform while it is logically hidden.
+    /// </summary>
     public void Hide() => transform.localScale = Vector3.zero;
+
+    /// <summary>Restores the brick to full size after a <see cref="Hide"/> call.</summary>
     public void Show() => transform.localScale = Vector3.one;
 
     // ── Input ─────────────────────────────────────────────────────────────────

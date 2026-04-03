@@ -12,11 +12,11 @@ public class BrickFactory : MonoBehaviour
 
     /// <summary>
     /// Instantiates a <see cref="BrickShow"/> for <paramref name="brick"/> under <paramref name="parent"/>.
-    /// Returns <c>null</c> for <see cref="BrickTypeSO.isNone"/> bricks (empty cells).
+    /// Returns <c>null</c> for <see cref="BrickTypeSO.IsNone"/> bricks (empty cells).
     /// </summary>
     public virtual BrickShow CreateBrick(Brick brick, Transform parent)
     {
-        if (brick.BrickType.isNone)
+        if (brick.BrickType.IsNone)
             return null;
 
         var go = Instantiate(brickPrefab, parent);
