@@ -1,5 +1,7 @@
 # Unity Match-3 Puzzle — Architecture Showcase
 
+[![Run Unity Tests](https://github.com/nadroj31/Unity-Match-3-Puzzle-Architecture-Showcase/actions/workflows/test.yml/badge.svg)](https://github.com/nadroj31/Unity-Match-3-Puzzle-Architecture-Showcase/actions/workflows/test.yml)
+
 A Toon Blast–style match-3 puzzle game built in Unity, designed as a **technical architecture showcase**.
 The focus is on clean separation of concerns, testable code, and extensible systems — not on content volume.
 

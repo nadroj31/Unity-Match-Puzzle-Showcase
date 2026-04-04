@@ -1,0 +1,58 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# test.yml  —  Run Unity Edit Mode tests on every push and pull request
+#
+# What this does:
+#   1. Spins up a Linux virtual machine on GitHub's servers (free)
+#   2. Checks out the repository code
+#   3. Starts Unity 6 inside a Docker container (GameCI image)
+#   4. Runs all 25 Edit Mode tests (BindableProperty, GoalTracker, BoardLogic)
+#   5. Reports pass / fail — a red result blocks a pull request from merging
+#   6. Uploads the XML test report as a downloadable artifact
+#
+# Prerequisites (GitHub Secrets — see activation.yml for setup instructions):
+#   UNITY_LICENSE   — full content of your .ulf activation file
+#   UNITY_EMAIL     — your Unity account email
+#   UNITY_PASSWORD  — your Unity account password
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: Run Unity Tests
+
+on:
+  push:
+    branches: [main]          # run whenever code lands on main
+  pull_request:
+    branches: [main]          # run on every PR targeting main; blocks merge if red
+
+jobs:
+  test:
+    name: Edit Mode Tests (Unity 6)
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Check out the repository ────────────────────────────────────────
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # ── 2. Run Unity Edit Mode tests ───────────────────────────────────────
+      # GameCI starts a Unity Docker container, activates the license using the
+      # secrets you configured, then runs all tests in the Tests.EditMode assembly.
+      - name: Run Edit Mode tests
+        id: tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE:  ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL:    ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          unityVersion:  6000.3.11f1
+          testMode:      EditMode      # only run Edit Mode tests (no Play Mode / All)
+          artifactsPath: test-results  # folder where XML reports are saved
+
+      # ── 3. Upload test results ──────────────────────────────────────────────
+      # Even if tests fail, upload the report so you can inspect which tests failed.
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()                   # upload even when the test step fails
+        with:
+          name: EditMode-test-results
+          path: ${{ steps.tests.outputs.artifactsPath }}
