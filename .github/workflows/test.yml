@@ -30,6 +30,9 @@ jobs:
   test:
     name: Edit Mode Tests (Unity 6000.3.11f1)
     runs-on: ubuntu-latest
+    permissions:
+      checks: write        # required to post test results back to the commit
+      contents: read       # required to check out the repository
 
     steps:
       # ── 1. Check out the repository ────────────────────────────────────────
