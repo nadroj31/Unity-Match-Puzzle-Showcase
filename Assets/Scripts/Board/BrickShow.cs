@@ -33,8 +33,10 @@ public class BrickShow : MonoBehaviour, IPointerClickHandler
     /// The original BrickShow is immediately hidden (scale zero) so the gravity
     /// system can recycle it for the next incoming brick without interrupting
     /// the destruction animation.
+    /// <paramref name="onComplete"/> is invoked after the ghost animation finishes,
+    /// allowing the caller to sequence gravity after all destructions are done.
     /// </summary>
-    public void Hide(BoardAnimationConfig config)
+    public void Hide(BoardAnimationConfig config, Action onComplete = null)
     {
         // Create a lightweight ghost that carries the visual while this BrickShow is recycled.
         var ghost = new GameObject("BrickGhost");
@@ -57,7 +59,7 @@ public class BrickShow : MonoBehaviour, IPointerClickHandler
         // outside the brick's cell boundaries (important in a dense grid).
         ghost.transform.DOScale(0f, config.destroyDuration)
              .SetEase(Ease.InBack)
-             .OnComplete(() => Destroy(ghost));
+             .OnComplete(() => { Destroy(ghost); onComplete?.Invoke(); });
 
         // Immediately hide this BrickShow — gravity will reuse it for the incoming brick.
         transform.localScale = Vector3.zero;

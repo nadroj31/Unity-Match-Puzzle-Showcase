@@ -188,18 +188,43 @@ public class GamePlayBoard : MonoBehaviour
     {
         BrickTypeSO matchType = matches[0].BrickType;
 
+        // Count how many ghost-destruction animations will play.
+        // IsNone cells have no BrickShow, so they don't contribute to the count.
+        int pendingDestroys = 0;
+        foreach (var brick in matches)
+            if (brickShows[brick.X, brick.Y] != null) pendingDestroys++;
+
+        // Called once every ghost has finished shrinking.
+        // Gravity and win-condition evaluation are deferred until this point so
+        // bricks don't start falling while the destruction animation is still playing.
+        void OnAllDestroyed()
+        {
+            BoardLogic.ApplyGravity(matches, bricks, brickTypeRegistry, OnBrickMoved);
+            winCondition.OnMatchMade(matchType, matches.Count);
+
+            // All gravity animations may already be done (e.g. top-row match with nothing above).
+            if (pendingAnimations == 0)
+                OnBoardSettled();
+        }
+
+        if (pendingDestroys == 0)
+        {
+            // No visible bricks in the match (edge case) — proceed immediately.
+            OnAllDestroyed();
+            return;
+        }
+
+        int remaining = pendingDestroys;
         foreach (var brick in matches)
         {
             var show = brickShows[brick.X, brick.Y];
-            if (show != null) show.Hide(animationConfig); // null for IsNone cells (no view)
+            if (show != null)
+                show.Hide(animationConfig, () =>
+                {
+                    remaining--;
+                    if (remaining == 0) OnAllDestroyed();
+                });
         }
-
-        BoardLogic.ApplyGravity(matches, bricks, brickTypeRegistry, OnBrickMoved);
-        winCondition.OnMatchMade(matchType, matches.Count);
-
-        // All gravity animations may already be done (e.g. top-row match with nothing above).
-        if (pendingAnimations <= 0)
-            OnBoardSettled();
     }
 
     /// <summary>
