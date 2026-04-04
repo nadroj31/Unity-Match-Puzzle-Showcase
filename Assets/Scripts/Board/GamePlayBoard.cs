@@ -225,7 +225,7 @@ public class GamePlayBoard : MonoBehaviour
     private void OnSingleAnimationComplete()
     {
         pendingAnimations--;
-        if (pendingAnimations <= 0)
+        if (pendingAnimations == 0)
             OnBoardSettled();
     }
 

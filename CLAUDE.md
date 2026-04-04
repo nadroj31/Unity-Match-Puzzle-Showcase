@@ -142,6 +142,35 @@ Files live in `Assets/Resources/LevelInfos/` and are named `level_XX.json`.
 2. Register it in the `BrickTypeRegistry` asset in the Inspector
 3. Add a `BrickVisual` entry in the `BrickVisualConfig` asset in the Inspector
 
+## Assembly Definitions
+
+The project uses three `.asmdef` files to create isolated, independently referenceable assemblies:
+
+| File | Name | Purpose |
+|---|---|---|
+| `Assets/Scripts/Game.asmdef` | `Game` | All runtime scripts; references `Unity.TextMeshPro` |
+| `Assets/Editor/Game.Editor.asmdef` | `Game.Editor` | Editor-only tools (`LevelEditorWindow`); references `Game`; `includePlatforms: [Editor]` |
+| `Assets/Tests/EditMode/Tests.EditMode.asmdef` | `Tests.EditMode` | Edit Mode unit tests; references `Game`; `UNITY_INCLUDE_TESTS` define constraint |
+
+**Why `Game.asmdef` references `Unity.TextMeshPro` explicitly:**
+Package assemblies marked `autoReferenced: true` are NOT automatically included in custom asmdefs — only in the default `Assembly-CSharp`. Any custom asmdef that uses `TMPro` types must list `Unity.TextMeshPro` in its `references` array.
+
+## Unit Tests
+
+Edit Mode tests live in `Assets/Tests/EditMode/`. Open **Window → General → Test Runner → EditMode** and click *Run All* (25 tests total).
+
+| Suite | Tests | What is covered |
+|---|---|---|
+| `BindablePropertyTests` | 8 | Initial value, `ValueChanged` fires only on change, old/new value delivery, unsubscribe, multiple subscribers |
+| `GoalTrackerTests` | 11 | Count decrement, zero-clamp, `IsComplete` guard fires once, wildcard (IsRandom) accepts any colour |
+| `BoardLogicTests` | 6 | Bricks fall into gaps, `onBrickMoved` callback, new-brick type from registry, unaffected columns never touched |
+
+**Test patterns used:**
+- `ScriptableObject.CreateInstance<T>()` — creates transient SO instances without needing AssetDatabase
+- `SerializedObject` + `FindProperty` — sets private `[SerializeField]` fields (e.g. `BrickTypeSO.isRandom`) that have no public setter
+- AAA naming: `[Method]_[Condition]_[ExpectedResult]`
+- `GoalTracker`, `BoardLogic`, `BindableProperty` are all pure C# with no MonoBehaviour dependency — runnable without Play Mode
+
 ## Coding Conventions
 
 - **No singletons** (except `ScenesManager` which is intentionally persistent across scenes)
