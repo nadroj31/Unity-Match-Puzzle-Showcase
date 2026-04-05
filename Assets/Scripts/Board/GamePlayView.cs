@@ -45,6 +45,9 @@ public class GamePlayView : ViewBase<GamePlayViewModel>
     [SerializeField] private Button retryButton;
     [SerializeField] private Button goBackFromFailButton;
 
+    [Header("Dependencies")]
+    [SerializeField] private GameSession gameSession;
+
     // ── Unity lifecycle ───────────────────────────────────────────────────────
 
     private void Awake()
@@ -124,6 +127,10 @@ public class GamePlayView : ViewBase<GamePlayViewModel>
     private void OnGoBackClicked()
     {
         DOTween.KillAll();
+        // Signal MainMenu to skip the title screen and open the level-select panel directly.
+        if (gameSession != null)
+            gameSession.ReturnToLevelSelect = true;
+
         if (ScenesManager.Instance != null)
             ScenesManager.Instance.LoadMainMenu();
         else

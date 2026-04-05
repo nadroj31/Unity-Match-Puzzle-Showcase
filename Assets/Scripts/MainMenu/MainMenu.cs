@@ -11,6 +11,7 @@ public class MainMenu : MonoBehaviour
 
     [Tooltip("ScriptableObject that implements ILevelLoader (e.g. LevelRepository).")]
     [SerializeField] private ScriptableObject  levelLoaderAsset;
+    [SerializeField] private GameSession       gameSession;
     [SerializeField] private Button            exitButton;
     [SerializeField] private Button            startButton;
     [SerializeField] private RecycledScrollView recycledScrollView;
@@ -39,6 +40,14 @@ public class MainMenu : MonoBehaviour
         exitButton.onClick.AddListener(CloseLevelSelectMenu);
         startButton.onClick.RemoveAllListeners();
         startButton.onClick.AddListener(OpenLevelSelectMenu);
+
+        // When returning from the gameplay scene after pressing OK, skip the title screen
+        // and go straight to the level-select panel so the player doesn't have to tap Start.
+        if (gameSession != null && gameSession.ReturnToLevelSelect)
+        {
+            gameSession.ReturnToLevelSelect = false; // consume the flag
+            OpenLevelSelectMenu();
+        }
     }
 
     // ── Menu actions ──────────────────────────────────────────────────────────
