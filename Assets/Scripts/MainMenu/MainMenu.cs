@@ -40,9 +40,14 @@ public class MainMenu : MonoBehaviour
         exitButton.onClick.AddListener(CloseLevelSelectMenu);
         startButton.onClick.RemoveAllListeners();
         startButton.onClick.AddListener(OpenLevelSelectMenu);
+    }
 
-        // When returning from the gameplay scene after pressing OK, skip the title screen
-        // and go straight to the level-select panel so the player doesn't have to tap Start.
+    private void Start()
+    {
+        // Checked in Start() — not Awake() — so that ScenesManager.Awake() has already
+        // run and destroyed the duplicate ScenesManager before RecycledScrollView tries
+        // to resolve its ISceneNavigator reference.  Awake() execution order is
+        // non-deterministic; Start() is guaranteed to run after all Awake() calls finish.
         if (gameSession != null && gameSession.ReturnToLevelSelect)
         {
             gameSession.ReturnToLevelSelect = false; // consume the flag

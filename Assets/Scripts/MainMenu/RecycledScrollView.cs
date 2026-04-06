@@ -82,7 +82,7 @@ public class RecycledScrollView : MonoBehaviour
         // Falling back to ScenesManager.Instance retrieves the persistent singleton instead.
         if (sceneNavigator == null || (Object)sceneNavigatorBehaviour == null)
         {
-            sceneNavigator = sceneNavigatorBehaviour != null
+            sceneNavigator = (Object)sceneNavigatorBehaviour != null
                 ? sceneNavigatorBehaviour as ISceneNavigator
                 : ScenesManager.Instance;
 

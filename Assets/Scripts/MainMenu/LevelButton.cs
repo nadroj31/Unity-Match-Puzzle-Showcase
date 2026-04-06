@@ -36,13 +36,21 @@ public class LevelButton : MonoBehaviour
 
     private void OpenGamePlayScene()
     {
-        if (sceneNavigator == null)
+        // sceneNavigator is stored as ISceneNavigator (interface); the underlying
+        // MonoBehaviour may have been destroyed without the C# reference becoming null.
+        // Cast to UnityEngine.Object to use Unity's overloaded == operator, which
+        // correctly detects destroyed instances.
+        ISceneNavigator nav = sceneNavigator;
+        if (nav is Object navObj && navObj == null)
+            nav = ScenesManager.Instance;
+
+        if (nav == null)
         {
-            Debug.LogError("[LevelButton] sceneNavigator is not set. Call SetNavigator() before use.", this);
+            Debug.LogError("[LevelButton] No valid ISceneNavigator found.", this);
             return;
         }
 
         gameSession.SelectedLevel = level;
-        sceneNavigator.LoadGamePlayScene();
+        nav.LoadGamePlayScene();
     }
 }
