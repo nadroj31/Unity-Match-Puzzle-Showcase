@@ -265,9 +265,44 @@ public class GamePlayBoard : MonoBehaviour
         if (viewModel.IsVictory.Value) return;
 
         if (levelDetails.moveLimit > 0 && movesRemaining <= 0)
+        {
             OnFailConditionMet();
-        else
-            isProcessing = false;
+            return;
+        }
+
+        // Deadlock: if no valid move exists anywhere on the board the player is stuck.
+        // Trigger fail regardless of remaining moves so the game never freezes.
+        if (IsDeadlocked())
+        {
+            OnFailConditionMet();
+            return;
+        }
+
+        isProcessing = false;
+    }
+
+    /// <summary>
+    /// Returns <c>true</c> when no brick on the board belongs to a connected group
+    /// large enough to be removed (i.e. every possible match is smaller than
+    /// <see cref="minMatchCount"/>). Uses the same <see cref="IMatchStrategy"/> as
+    /// normal gameplay so the result is consistent with what the player can actually do.
+    /// </summary>
+    private bool IsDeadlocked()
+    {
+        int width  = levelDetails.gridWidth;
+        int height = levelDetails.gridHeight;
+
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+            {
+                Brick brick = bricks[x, y];
+                if (brick.BrickType == null || brick.BrickType.IsNone) continue;
+
+                if (matchStrategy.FindMatches(brick, bricks).Count >= minMatchCount)
+                    return false;
+            }
+
+        return true;
     }
 
     // ── Outcome ───────────────────────────────────────────────────────────────
