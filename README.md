@@ -13,7 +13,7 @@ The focus is on clean separation of concerns, testable code, and extensible syst
 
 Players tap connected groups of same-coloured bricks to remove them. Surviving bricks fall down under gravity and new random bricks drop in from above. Each level defines up to three brick-clearing goals and an optional move limit.
 
-*Screenshot / GIF coming soon*
+![Brick Blast Gameplay](docs/gameplay.gif)
 
 ---
 
